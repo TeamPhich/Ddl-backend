@@ -1,0 +1,9 @@
+{
+  "port": 3000,
+  "DATABASE": {
+    "HOST": "localhost",
+    "USER": "deadline",
+    "PASSWORD": "deadline@123",
+    "NAME": "deadline"
+  }
+}

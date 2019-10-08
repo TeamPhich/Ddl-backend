@@ -1,9 +1,0 @@
-{
-  "PORT": 3000,
-  "DATABASE": {
-    "HOST": "localhost",
-    "USER": "root",
-    "PASSWORD": "1234",
-    "NAME": "deadline"
-  }
-}

@@ -26,6 +26,6 @@ jobs: # a collection of steps
                 - si
                 - dev
           name: deadline
-          command: ssh -o "StrictHostKeyChecking no" ubuntu@18.162.125.153 "cd ~/Ddl-backend && git pull && npm install && pm2 start ecosystem.config.js"
+          command: ssh -o "StrictHostKeyChecking no" ubuntu@18.162.125.153 'cd ~/Ddl-backend && git pull && npm install && pm2 start ecosystem.config.js'
 
 

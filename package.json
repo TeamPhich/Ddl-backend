@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test-dev": "mocha ./test/dev.js",
+    "test-dev": "mocha --timeout 5000",
     "local": "NODE_ENV=dev nodemon index.js",
     "dev": "NODE_ENV=dev node index.js",
     "production": "NODE_ENV=production node index.js"

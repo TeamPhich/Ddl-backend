@@ -19,19 +19,13 @@ jobs: # a collection of steps
       - run: # run tests
           name: test
           command: npm run test-dev
-  deploy:
-    working_directory: ~/deadline # directory where steps will run
-    docker: # run the steps with Docker
-      - image: circleci/node:10.16.3 # ...with this image as the primary container; this is where all `steps` will run
-    steps: # a collection of executable commands
       - run:
+          filters:
+            branches:
+              only:
+                - master
+                - dev
           name: deadline
-          command: ssh -o "StrictHostKeyChecking no" ubuntu@18.162.125.153 "cd ~/Ddl-backend; git pull; npm install; NODE_ENV=dev pm2 restart index.js --name=ddl-backend"
-    requires:
-      - build
-    filters:
-      branches:
-        only:
-          - master
-          - dev
+          command: ssh -o "StrictHostKeyChecking no" ubuntu@18.162.125.153 'cd ~/Ddl-backend && git pull && npm install && pm2 start ecosystem.config.js'
+
 

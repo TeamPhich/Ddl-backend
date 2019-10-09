@@ -1,9 +1,9 @@
 {
   "port": 4000,
   "DATABASE": {
-    "HOST": "localhost",
+    "HOST": "18.162.125.153",
     "USER": "deadline",
-    "PASSWORD": "deadline@123",
+    "PASSWORD": "T3cHaj~4T^y,uE+t",
     "NAME": "deadline"
   }
 }

@@ -21,4 +21,4 @@ jobs: # a collection of steps
           command: npm run test-dev
       - deploy:
           name: deadline
-          command: ssh -o "StrictHostKeyChecking no" ubuntu@18.162.125.153 "cd ~/Ddl-backend; git pull; npm install; NODE_ENV=dev pm2 start index.js --name=ddl-backend"
+          command: ssh -o "StrictHostKeyChecking no" ubuntu@18.162.125.153 "cd ~/Ddl-backend; git pull; npm install; NODE_ENV=dev pm2 restart index.js --name=ddl-backend"

@@ -1,6 +1,6 @@
-version: 2.0 # use CircleCI 2.1
+version: 2.0
 jobs: # a collection of steps
-  - build: # runs not using Workflows must have a `build` job as entry point
+  build: # runs not using Workflows must have a `build` job as entry point
     working_directory: ~/deadline # directory where steps will run
     docker: # run the steps with Docker
       - image: circleci/node:10.16.3 # ...with this image as the primary container; this is where all `steps` will run
@@ -19,13 +19,29 @@ jobs: # a collection of steps
       - run: # run tests
           name: test
           command: npm run test-dev
-  - deploy:
+  deploy:
       name: deadline
-      requires:
-        - build
-      filters:
-        branches:
-          only:
-            - master
-            - dev
       command: ssh -o "StrictHostKeyChecking no" ubuntu@18.162.125.153 "cd ~/Ddl-backend; git pull; npm install; NODE_ENV=dev pm2 restart index.js --name=ddl-backend"
+
+workflows:
+  version: 2 # use CircleCI 2.1
+
+  build:
+      jobs:
+        - build
+  build_and_deploy:
+      jobs:
+        - build:
+            filters:
+              branches:
+                only:
+                  - master
+                  - dev
+        - deploy:
+            requires:
+              - build
+            filters:
+              branches:
+                only:
+                  - master
+                  - dev

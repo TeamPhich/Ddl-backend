@@ -27,26 +27,11 @@ jobs: # a collection of steps
       - run:
           name: deadline
           command: ssh -o "StrictHostKeyChecking no" ubuntu@18.162.125.153 "cd ~/Ddl-backend; git pull; npm install; NODE_ENV=dev pm2 restart index.js --name=ddl-backend"
+    requires:
+      - build
+    filters:
+      branches:
+        only:
+          - master
+          - dev
 
-workflows:
-  version: 2 # use CircleCI 2.1
-
-  build:
-      jobs:
-        - build
-  build_and_deploy:
-      jobs:
-        - build:
-            filters:
-              branches:
-                only:
-                  - master
-                  - dev
-        - deploy:
-            requires:
-              - build
-            filters:
-              branches:
-                only:
-                  - master
-                  - dev

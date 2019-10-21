@@ -1,6 +1,18 @@
 const dbPool = require("../db");
 const responseUtil = require("../utils/response.util");
 
+async function getGroups(req, res) {
+    const {
+        space_id
+    } = req.body;
+    try {
+        const  temp = await  dbPool.query(`SELECT * FROM groups WHERE space_id = "${space_id}"`);
+        res.json(responseUtil.success({data: {temp}}))
+    } catch (err) {
+        res.json(responseUtil.fail({reason : err.message}))
+    }
+}
+
 async function createGroup(req, res) {
     const {
         space_id,
@@ -46,8 +58,22 @@ async  function removeMembers(req, res) {
     }
 }
 
+async  function getMembers(req, res) {
+    const {
+        group_id
+    } = req.body
+    try{
+        const temp = await dbPool.query(`SELECT user_id,user_name,email FROM groups_members INNER JOIN accounts ON groups_members.user_id = accounts.id WHERE group_id = "${group_id}"`);
+        res.json(responseUtil.success({data: {temp}}))
+    } catch (err) {
+        res.json(responseUtil.fail({reason: err.message}))
+    }
+}
+
 module.exports = {
+    getGroups,
     createGroup,
     addMembers,
     removeMembers,
+    getMembers
 };

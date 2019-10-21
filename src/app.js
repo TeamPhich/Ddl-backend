@@ -4,6 +4,7 @@ const morgan = require("morgan");
 const config = require("config");
 
 const accountsRoute = require("./routes/accounts.route");
+const groupsRoute = require("./routes/groups.route");
 
 const app = express();
 
@@ -15,10 +16,11 @@ app.use(morgan('combined'));
 
 app.use("/api/v1/accounts/", accountsRoute);
 
+app.use("/api/v1/groups/",groupsRoute);
+
 app.use("/api/v1", (req, res) => {
     res.send("ddl-backend");
 });
-
 
 app.listen(port, () => {
     console.log("server is running on port: ", port);

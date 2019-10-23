@@ -16,6 +16,19 @@ async function createSpace(req, res) {
     }
 }
 
+async function getListSpace(req, res) {
+    try {
+        const id = req.tokenData.id;
+        const [rows] = await dbPool.query(`select name, id from spaces where user_id = ${id}`);
+        res.json(responseUtil.success({data: {rows}}));
+    }
+    catch(err) {
+        res.send(responseUtil.fail({reason: err.message}))
+    }
+}
+
 module.exports = {
-    createSpace
+    createSpace,
+    getListSpace,
+
 };

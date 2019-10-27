@@ -67,7 +67,7 @@ async  function removeMembers(req, res) {
     try{
         for (let i = 0 ; i < user_ids.length ; i++ ) {
             const temp = await dbPool.query(`   DELETE FROM groups_members 
-                                                WHERE user_id = "${user_ids[]}" 
+                                                WHERE user_id = "${user_ids[i]}" 
                                                 AND group_id = "${group_id}"`);
         }
         res.json(responseUtil.success({data: {}}))

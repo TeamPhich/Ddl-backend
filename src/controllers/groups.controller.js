@@ -7,10 +7,12 @@ async function getGroups(req, res) {
     } = req.body;
     try {
         const id = req.tokenData.id;
-        const  [rows] = await  dbPool.query(` SELECT * FROM groups_members 
-                                            INNER JOIN groups ON groups_members.group_id = groups.id 
-                                            WHERE groups.space_id = "${space_id}"
-                                            AND groups_members.user_id = "${id}"`);
+        const  [rows] = await  dbPool.query(`   SELECT groups.id , groups.space_id , groups.name, groups.couple 
+                                                FROM groups 
+                                                INNER JOIN spaces ON groups.space_id = spaces.id 
+                                                INNER JOIN spaces_members ON spaces.id = spaces_members.space_id 
+                                                WHERE spaces_members.user_id = "${id}"
+                                                AND groups.space_id = "${space_id}"`);
         res.json(responseUtil.success({data: {rows}}))
     } catch (err) {
         res.json(responseUtil.fail({reason : err.message}))
@@ -27,11 +29,14 @@ async function createGroup(req, res) {
         const id = req.tokenData.id;
         const [existGroups] = await dbPool.query(`  SELECT * FROM spaces 
                                                     INNER JOIN groups ON spaces.id = groups.space_id 
-                                                    AND groups.name = "${name}"`);
+                                                    WHERE groups.name = "${name}"`);
         if (existGroups.length) throw new Error("group_name existed");
         const [temp1] = await dbPool.query(`INSERT INTO groups (space_id,name,couple) VALUES (${space_id},"${name}",${couple})`);
         const group_id = temp1.insertId;
-        const temp2 = await dbPool.query(`INSERT INTO groups_members (user_id,group_id) VALUES (${id},${group_id})`);
+        const  [temp2] = await dbPool.query(`   SELECT id FROM spaces_members 
+                                                WHERE spaces_members.user_id = "${id}" 
+                                                AND spaces_members.space_id = "${space_id}"`);
+        const [temp3] = await dbPool.query(`INSERT INTO groups_members (member_id,group_id) VALUES (${temp2[0]["id"]},${group_id})`);
         res.json(responseUtil.success({data: {}}))
     } catch (err) {
         res.json(responseUtil.fail({reason: err.message}))
@@ -81,9 +86,10 @@ async  function getMembers(req, res) {
         group_id
     } = req.body
     try{
-        const [rows] = await dbPool.query(` SELECT user_id,user_name,email FROM groups_members 
-                                            INNER JOIN accounts ON groups_members.user_id = accounts.id 
-                                            WHERE group_id = "${group_id}"`);
+        const [rows] = await dbPool.query(` SELECT * FROM groups_members 
+        INNER JOIN spaces_members ON groups_members.member_id = spaces_members.id 
+        INNER JOIN accounts ON spaces_members.user_id = accounts.id 
+        WHERE groups_members.group_id = ${group_id}`);
         res.json(responseUtil.success({data: {rows}}))
     } catch (err) {
         res.json(responseUtil.fail({reason: err.message}))

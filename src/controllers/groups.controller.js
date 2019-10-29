@@ -45,16 +45,16 @@ async function createGroup(req, res) {
 
 async function addMembers(req, res) {
     const {
-        user_ids,
+        space_member_ids,
         group_id
     } = req.body
     try{
-        for (let i = 0 ; i < user_ids.length ; i++ ) {
+        for (let i = 0 ; i < space_member_ids.length ; i++ ) {
             const [temp1] = await dbPool.query(`  SELECT * FROM groups_members 
-                                                WHERE user_id = ${user_ids[i]} AND group_id = ${group_id}`);
+                                                WHERE member_id = ${space_member_ids[i]} AND group_id = ${group_id}`);
             if (!temp1.length) {
                 const temp2 = await dbPool.query(`   INSERT INTO groups_members 
-                                                (user_id,group_id) VALUES ("${user_ids[i]}","${group_id}")`);
+                                                (member_id,group_id) VALUES ("${space_member_ids[i]}","${group_id}")`);
             }
             else throw new Error("The user is already in the group");
         }
@@ -66,13 +66,13 @@ async function addMembers(req, res) {
 
 async  function removeMembers(req, res) {
     const {
-        user_ids,
+        member_ids,
         group_id
     } = req.body
     try{
-        for (let i = 0 ; i < user_ids.length ; i++ ) {
+        for (let i = 0 ; i < member_ids.length ; i++ ) {
             const temp = await dbPool.query(`   DELETE FROM groups_members 
-                                                WHERE user_id = "${user_ids[i]}" 
+                                                WHERE user_id = "${member_ids[i]}" 
                                                 AND group_id = "${group_id}"`);
         }
         res.json(responseUtil.success({data: {}}))

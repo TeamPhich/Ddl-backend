@@ -29,7 +29,7 @@ async function createGroup(req, res) {
         const id = req.tokenData.id;
         const [existGroups] = await dbPool.query(`  SELECT * FROM spaces 
                                                     INNER JOIN groups ON spaces.id = groups.space_id 
-                                                    WHERE groups.name = "${name}"`);
+                                                    WHERE groups.name = "${name}" AND groups.space_id = ${space_id}`);
         if (existGroups.length) throw new Error("group_name existed");
         const [temp1] = await dbPool.query(`INSERT INTO groups (space_id,name,couple) VALUES (${space_id},"${name}",${couple})`);
         const group_id = temp1.insertId;
@@ -72,7 +72,7 @@ async  function removeMembers(req, res) {
     try{
         for (let i = 0 ; i < member_ids.length ; i++ ) {
             const temp = await dbPool.query(`   DELETE FROM groups_members 
-                                                WHERE user_id = "${member_ids[i]}" 
+                                                WHERE groups_members.member_id = "${member_ids[i]}" 
                                                 AND group_id = "${group_id}"`);
         }
         res.json(responseUtil.success({data: {}}))

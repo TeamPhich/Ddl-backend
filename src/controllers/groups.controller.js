@@ -53,6 +53,11 @@ async function addMembers(req, res) {
         group_id
     } = req.body
     try{
+        const id = req.tokenData.id;
+        const [temp_id] = await dbPool.query(`  SELECT * FROM spaces_members
+                                                INNER JOIN groups_members ON spaces_members.id = groups_members.member_id
+                                                WHERE spaces_members.user_id = "${id}"`);
+        if (!temp_id.length) throw  new Error("you are not in group");
         if(!member_ids) throw new Error("member_ids field is missing");
         if(!group_id) throw new Error("group_id field is missing");
         var member_ids_filtered = member_ids;
@@ -90,7 +95,6 @@ async function addMembers(req, res) {
             if ( member_ids_filtered[i] != null) {
                 const [temp] = await  dbPool.query(`INSERT INTO groups_members (member_id, group_id) VALUES ("${member_ids_filtered[i]}","${group_id}")`);
             }
-            else console.log("null");
         }
         res.json(responseUtil.success({data: {users_not_in_space, users_in_group, member_ids_filtered}}))
     } catch (err) {
@@ -104,6 +108,12 @@ async  function removeMembers(req, res) {
         group_id
     } = req.body
     try{
+        const id = req.tokenData.id;
+        const [temp_id] = await dbPool.query(`  SELECT * FROM spaces_members
+                                                INNER JOIN groups_members ON spaces_members.id = groups_members.member_id
+                                                WHERE spaces_members.user_id = "${id}"`);
+        console.log(temp_id);
+        if (!temp_id.length) throw  new Error("you are not in group");
         if(!member_id) throw new Error("member_id field is missing");
         if(!group_id) throw new Error("group_id field is missing");
         const temp = await dbPool.query(`   DELETE FROM groups_members 

@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test-dev": "mocha --exit test/dev.js",
-    "local": "NODE_ENV=dev nodemon index.js",
+    "local": "NODE_ENV=myLocal nodemon index.js",
     "dev": "NODE_ENV=dev node index.js",
     "production": "NODE_ENV=production node index.js"
   },
@@ -34,6 +34,6 @@
     "chai": "^4.2.0",
     "chai-http": "^4.3.0",
     "mocha": "^6.2.1",
-    "nodemon": "^1.19.3"
+    "nodemon": "^1.19.4"
   }
 }

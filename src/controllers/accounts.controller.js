@@ -51,18 +51,22 @@ async function register(req, res) {
     const {
         user_name,
         password,
-        email
+        email,
+        full_name
     } = req.body;
 
     try {
         if (user_name.length < 8) throw new Error("user_name must greater than 8 characters");
         if (password.length < 8) throw new Error("password must greater than 8 characters");
+        if (!full_name) throw new Error("fullname attribute is missing");
 
         const [existUsers] = await dbPool.query(`select * from accounts where user_name = "${user_name}"`);
+        const [existEmail] = await dbPool.query(`select * from accounts where email = "${email}"`);
         if (existUsers.length) throw new Error("user_name existed");
+        if (existEmail.length) throw new Error("email existed");
         let salt = await bcrypt.genSalt(10);
         let hashPassword = await bcrypt.hash(password, salt);
-        await dbPool.query(`insert into accounts (user_name, password, email) values ("${user_name}", "${hashPassword}", "${email}")`);
+        await dbPool.query(`insert into accounts (user_name, password, email, full_name) values ("${user_name}", "${hashPassword}", "${email}", "${full_name}")`);
 
         res.json(responseUtil.success({data: {}}))
 

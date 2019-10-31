@@ -6,6 +6,7 @@ async function getGroups(req, res) {
         space_id
     } = req.body;
     try {
+        if(!space_id) throw new Error("space_id field is missing");
         const id = req.tokenData.id;
         const  [rows] = await  dbPool.query(`   SELECT groups.id , groups.space_id , groups.name, groups.couple 
                                                 FROM groups 
@@ -26,6 +27,9 @@ async function createGroup(req, res) {
         couple
     } = req.body;
     try{
+        if(!space_id) throw new Error("space_id field is missing");
+        if(!name) throw new Error("name field is missing");
+        if(!couple) throw new Error("couple field is missing");
         const id = req.tokenData.id;
         const [existGroups] = await dbPool.query(`  SELECT * FROM spaces 
                                                     INNER JOIN groups ON spaces.id = groups.space_id 
@@ -45,18 +49,34 @@ async function createGroup(req, res) {
 
 async function addMembers(req, res) {
     const {
-        space_member_ids,
+        member_ids,
         group_id
     } = req.body
     try{
-        for (let i = 0 ; i < space_member_ids.length ; i++ ) {
-            const [temp1] = await dbPool.query(`  SELECT * FROM groups_members 
-                                                WHERE member_id = ${space_member_ids[i]} AND group_id = ${group_id}`);
-            if (!temp1.length) {
-                const temp2 = await dbPool.query(`   INSERT INTO groups_members 
-                                                (member_id,group_id) VALUES ("${space_member_ids[i]}","${group_id}")`);
+        if(!member_ids) throw new Error("member_ids field is missing");
+        if(!group_id) throw new Error("group_id field is missing");
+        var member_ids_filtered = member_ids;
+        var users_not_in_space = []
+        var users_in_group = [];
+        for (let i = 0 ; i < member_ids.length ; i++) {
+            const [temp1] = await dbPool.query(`    SELECT * FROM groups_members 
+                                                    WHERE groups_members.member_id = ${space_member_ids[i]} AND groups_members.group_id = ${group_id}`);
+            if (temp1.length) {
+                users_in_group.push(member_ids[i]);
             }
-            else throw new Error("The user is already in the group");
+            const [temp2] = await dbPool.query(`    SELECT * FROM spaces_members 
+                                                    WHERE spaces_members.id = "${member_ids[i]}"
+                                                    AND spaces_members.space_id = ( SELECT space_id FROM groups 
+                                                                                    INNER JOIN spaces ON groups.space_id = spaces.id
+                                                                                    WHERE groups.id = "${group_id}")`);
+            if (!temp2.length) {
+                users_not_in_space.push(member_ids[i]);
+            }
+        }
+        member_ids_filtered = member_ids_filtered.filter(users_in_group);
+        member_ids_filtered = member_ids_filtered.filter(users_not_in_space);
+        for (let i = 0 ; i < member_ids_filtered.length ; i++){
+            const [temp] = await  dbPool.query(`INSERT INTO groups_members (member_id, group_id) VALUES ("${member_ids_filtered[i]}","${group_id}")`);
         }
         res.json(responseUtil.success({data: {}}))
     } catch (err) {
@@ -70,11 +90,11 @@ async  function removeMembers(req, res) {
         group_id
     } = req.body
     try{
-        for (let i = 0 ; i < member_ids.length ; i++ ) {
-            const temp = await dbPool.query(`   DELETE FROM groups_members 
-                                                WHERE groups_members.member_id = "${member_ids[i]}" 
-                                                AND group_id = "${group_id}"`);
-        }
+        if(!member_ids) throw new Error("member_ids field is missing");
+        if(!group_id) throw new Error("group_id field is missing");
+        const temp = await dbPool.query(`   DELETE FROM groups_members 
+                                            WHERE groups_members.member_id = "${member_ids[i]}" 
+                                            AND groups_members.group_id = "${group_id}"`);
         res.json(responseUtil.success({data: {}}))
     } catch (err) {
         res.json(responseUtil.fail({reason: err.message}))
@@ -86,10 +106,11 @@ async  function getMembers(req, res) {
         group_id
     } = req.body
     try{
+        if(!group_id) throw new Error("group_id field is missing");
         const [rows] = await dbPool.query(` SELECT * FROM groups_members 
-        INNER JOIN spaces_members ON groups_members.member_id = spaces_members.id 
-        INNER JOIN accounts ON spaces_members.user_id = accounts.id 
-        WHERE groups_members.group_id = ${group_id}`);
+                                            INNER JOIN spaces_members ON groups_members.member_id = spaces_members.id 
+                                            INNER JOIN accounts ON spaces_members.user_id = accounts.id 
+                                            WHERE groups_members.group_id = ${group_id}`);
         res.json(responseUtil.success({data: {rows}}))
     } catch (err) {
         res.json(responseUtil.fail({reason: err.message}))

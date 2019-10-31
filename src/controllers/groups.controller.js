@@ -7,11 +7,11 @@ async function getGroups(req, res) {
     } = req.body;
     try {
         const id = req.tokenData.id;
+        if(!space_id) throw new Error("space_id field is missing");
         const [temp_id] = await dbPool.query(`  SELECT * FROM spaces_members                                            
-                                                WHERE spaces_members.user_id = "${id}" 
+                                                WHERE spaces_members.user_id = "${id}"
                                                 AND spaces_members.space_id = "${space_id}"`);
         if (!temp_id.length) throw  new Error("you are not in space");
-        if(!space_id) throw new Error("space_id field is missing");
         const  [rows] = await  dbPool.query(`   SELECT * FROM groups 
                                                 INNER JOIN groups_members ON groups.id = groups_members.group_id
                                                 INNER JOIN spaces_members ON groups_members.member_id = spaces_members.id
@@ -67,23 +67,25 @@ async function addMembers(req, res) {
         var users_not_in_space = [];
         var users_in_group = [];
         for (let i = member_ids.length - 1 ; i >= 0 ; i--) {
-            const [temp1] = await dbPool.query(`    SELECT * FROM groups_members 
+            const [temp1] = await dbPool.query(`    SELECT * FROM groups_members
                                                     WHERE groups_members.member_id = "${member_ids[i]}" AND groups_members.group_id = "${group_id}"`);
-            const [temp2] = await dbPool.query(`    SELECT * FROM spaces_members 
-                                                    WHERE spaces_members.id = "${member_ids[i]}"
-                                                    AND spaces_members.space_id = ( SELECT space_id FROM groups 
-                                                                                    INNER JOIN spaces ON groups.space_id = spaces.id
-                                                                                    WHERE groups.id = "${group_id}")`);
-            if (temp2.length) {
-                users_not_in_space.push(member_ids[i]);
+            console.log(temp1);
+            if (temp1.length) {
+                users_in_group.push(member_ids[i]);
                 member_ids_filtered = member_ids_filtered.filter(function (value , index , arr) {
                     return value = member_ids[i];
                 });
                 delete member_ids_filtered[i];
                 continue;
             }
-            if (temp1.length) {
-                users_in_group.push(member_ids[i]);
+            const [temp2] = await dbPool.query(`    SELECT * FROM spaces_members 
+                                                    WHERE spaces_members.id = "${member_ids[i]}"
+                                                    AND spaces_members.space_id = ( SELECT space_id FROM groups 
+                                                                                    INNER JOIN spaces ON groups.space_id = spaces.id
+                                                                                    WHERE groups.id = "${group_id}")`);
+            console.log(temp2);
+            if (!temp2.length) {
+                users_not_in_space.push(member_ids[i]);
                 member_ids_filtered = member_ids_filtered.filter(function (value , index , arr) {
                     return value = member_ids[i];
                 });

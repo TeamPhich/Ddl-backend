@@ -69,7 +69,6 @@ async function addMembers(req, res) {
         for (let i = member_ids.length - 1 ; i >= 0 ; i--) {
             const [temp1] = await dbPool.query(`    SELECT * FROM groups_members
                                                     WHERE groups_members.member_id = "${member_ids[i]}" AND groups_members.group_id = "${group_id}"`);
-            console.log(temp1);
             if (temp1.length) {
                 users_in_group.push(member_ids[i]);
                 member_ids_filtered = member_ids_filtered.filter(function (value , index , arr) {
@@ -83,7 +82,6 @@ async function addMembers(req, res) {
                                                     AND spaces_members.space_id = ( SELECT space_id FROM groups 
                                                                                     INNER JOIN spaces ON groups.space_id = spaces.id
                                                                                     WHERE groups.id = "${group_id}")`);
-            console.log(temp2);
             if (!temp2.length) {
                 users_not_in_space.push(member_ids[i]);
                 member_ids_filtered = member_ids_filtered.filter(function (value , index , arr) {
@@ -93,9 +91,6 @@ async function addMembers(req, res) {
                 continue;
             }
         }
-        console.log(users_not_in_space);
-        console.log(users_in_group);
-        console.log(member_ids_filtered);
         for (let i = 0 ; i < member_ids_filtered.length ; i++){
             if ( member_ids_filtered[i] != null) {
                 const [temp] = await  dbPool.query(`INSERT INTO groups_members (member_id, group_id) VALUES ("${member_ids_filtered[i]}","${group_id}")`);
@@ -117,7 +112,6 @@ async  function removeMembers(req, res) {
         const [temp_id] = await dbPool.query(`  SELECT * FROM spaces_members
                                                 INNER JOIN groups_members ON spaces_members.id = groups_members.member_id
                                                 WHERE spaces_members.user_id = "${id}"`);
-        console.log(temp_id);
         if (!temp_id.length) throw  new Error("you are not in group");
         if(!member_id) throw new Error("member_id field is missing");
         if(!group_id) throw new Error("group_id field is missing");

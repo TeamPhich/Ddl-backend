@@ -51,11 +51,10 @@ async function addMember(req, res) {
                             VALUES (${user_id}, ${space_id}, 2)`);
         let [group_id] = await dbPool.query(`select id from groups where name = "everyone" and space_id = ${space_id}`);
         group_id = group_id[0].id;
-        console.log(group_id);
-        await dbPool.query(`SET FOREIGN_KEY_CHECKS=0`);
+        let [member_id] = await dbPool.query(`select id from spaces_members where user_id = ${user_id} and space_id = ${space_id}`);
+        member_id = member_id[0].id;
         await dbPool.query(`INSERT INTO groups_members(member_id, group_id)
-                            VALUES (${user_id}, ${group_id})`);
-        await dbPool.query(`SET FOREIGN_KEY_CHECKS=1`);
+                            VALUES (${member_id}, ${group_id})`);
         res.json(responseUtil.success({data: {}}));
     } catch (err) {
         res.send(responseUtil.fail({reason: err.message}))

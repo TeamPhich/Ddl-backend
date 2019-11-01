@@ -1,9 +1,10 @@
 {
   "port": 4000,
   "DATABASE": {
-    "HOST": "localhost",
-    "USER": "deadline",
-    "PASSWORD": "deadline@123",
+    "HOST": "18.162.125.153",
+    "USER": "phpmyadmin",
+    "PASSWORD": "2CGm{7f9d{!\"WYmQ",
     "NAME": "deadline"
-  }
+  },
+  "SECRET_KEY": "ZJtB@9p_m#Nk=!wn"
 }

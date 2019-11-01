@@ -64,9 +64,9 @@ async function addMembers(req, res) {
         if (!temp_id.length) throw  new Error("you are not in group");
         if (!member_ids) throw new Error("member_ids field is missing");
         if (!group_id) throw new Error("group_id field is missing");
-        var member_ids_filtered = member_ids;
-        var users_not_in_space = [];
-        var users_in_group = [];
+        let member_ids_filtered = member_ids;
+        let users_not_in_space = [];
+        let users_in_group = [];
         for (let i = member_ids.length - 1; i >= 0; i--) {
             const [temp1] = await dbPool.query(`    SELECT * FROM groups_members
                                                     WHERE groups_members.member_id = "${member_ids[i]}" AND groups_members.group_id = "${group_id}"`);

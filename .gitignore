@@ -1,4 +1,4 @@
 .idea
 .gitignore
 node_modules/
-config/myLocal.json
+config/local.json

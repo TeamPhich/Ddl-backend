@@ -59,7 +59,8 @@ async function addMembers(req, res) {
         const id = req.tokenData.id;
         const [temp_id] = await dbPool.query(`  SELECT * FROM spaces_members
                                                 INNER JOIN groups_members ON spaces_members.id = groups_members.member_id
-                                                WHERE spaces_members.user_id = "${id}"`);
+                                                WHERE spaces_members.user_id = "${id}"
+                                                AND groups_members.group_id = "${group_id}"`);
         if (!temp_id.length) throw  new Error("you are not in group");
         if(!member_ids) throw new Error("member_ids field is missing");
         if(!group_id) throw new Error("group_id field is missing");
@@ -111,7 +112,8 @@ async  function removeMembers(req, res) {
         const id = req.tokenData.id;
         const [temp_id] = await dbPool.query(`  SELECT * FROM spaces_members
                                                 INNER JOIN groups_members ON spaces_members.id = groups_members.member_id
-                                                WHERE spaces_members.user_id = "${id}"`);
+                                                WHERE spaces_members.user_id = "${id}"
+                                                AND groups_members.group_id = "${group_id}"`);
         if (!temp_id.length) throw  new Error("you are not in group");
         if(!member_id) throw new Error("member_id field is missing");
         if(!group_id) throw new Error("group_id field is missing");
@@ -132,7 +134,8 @@ async  function getMembers(req, res) {
         const id = req.tokenData.id;
         const [temp_id] = await dbPool.query(`  SELECT * FROM spaces_members
                                                 INNER JOIN groups_members ON spaces_members.id = groups_members.member_id
-                                                WHERE spaces_members.user_id = "${id}"`);
+                                                WHERE spaces_members.user_id = "${id}"
+                                                AND groups_members.group_id = "${group_id}"`);
         if (!temp_id.length) throw  new Error("you are not in group");
         if(!group_id) throw new Error("group_id field is missing");
         const [rows] = await dbPool.query(` SELECT * FROM groups_members 

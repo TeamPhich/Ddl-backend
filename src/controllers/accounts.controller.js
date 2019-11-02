@@ -6,7 +6,7 @@ const responseUtil = require("../utils/response.util");
 
 async function getAccounts(req, res) {
     try {
-        const [rows, fields] = await dbPool.query("select * from accounts");
+        const [rows] = await dbPool.query("select * from accounts");
         res.send(responseUtil.success({data: rows}));
     } catch (err) {
         res.send(responseUtil.fail({reason: err.message}))
@@ -27,7 +27,7 @@ async function login(req, res) {
         const hashPassword = user.password;
         const checkPass = bcrypt.compareSync(password, hashPassword);
 
-        if(!checkPass) throw new Error("user_name or password is incorrect");
+        if (!checkPass) throw new Error("user_name or password is incorrect");
 
         const twentyFourHours = 24 * 60 * 60 * 30;
 

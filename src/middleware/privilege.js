@@ -4,8 +4,8 @@ const responseUtil = require("../utils/response.util");
 function verify(privilege) {
     return async (req, res, next) => {
         try {
-            const space_member_id = req.headers["space_member_id"];
-            if (!space_member_id) throw new Error("space_member_id headers is missing");
+            const {space_member_id} = req.tokenData;
+            if (!space_member_id) throw new Error("user have been not access to space");
             const [rowMember] = await db.query(`select role_id 
                                                 from spaces_members 
                                                 where id = ${space_member_id}`);

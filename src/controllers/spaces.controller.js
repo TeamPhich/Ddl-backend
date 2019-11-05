@@ -113,6 +113,7 @@ async function removeMember(req, res){
         user_id,
         space_id
     } = req.body;
+    // const privilege = req.privilegeData.id;
     try{
         if(!space_id)
             throw new Error("space_id field is missing");
@@ -128,12 +129,12 @@ async function removeMember(req, res){
                                               WHERE user_id = ${user_id} AND space_id = ${space_id}`);
         if(!member_id.length)
             throw new Error("user account is not in space!");
-        let [member_role] = await dbPool.query(`SELECT role_id
-                                                FROM spaces_members
-                                                WHERE user_id = ${id} AND space_id = ${space_id}`);
-        member_role = member_role[0].role_id;
-        if(member_role == 2)
-            throw new Error("user account does not have permission to delete this member!");
+        // let [member_role] = await dbPool.query(`SELECT role_id
+        //                                         FROM spaces_members
+        //                                         WHERE user_id = ${id} AND space_id = ${space_id}`);
+        // member_role = member_role[0].role_id;
+        // if(member_role == 2)
+        //     throw new Error("user account does not have permission to delete this member!");
         let [member] = await dbPool.query(`SELECT group_id,member_id 
                                           FROM groups_members 
                                           INNER JOIN spaces_members ON groups_members.member_id = spaces_members.id 

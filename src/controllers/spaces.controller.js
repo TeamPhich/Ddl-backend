@@ -54,20 +54,20 @@ async function addMember(req, res) {
     const {user_id, space_id} = req.body;
     try {
         if (!space_id)
-            throw new Error("missing space_id!");
+            throw new Error("space_id field is missing!");
         const [user] = await dbPool.query(`SELECT user_id 
                                            FROM spaces_members 
                                            WHERE user_id = ${id} AND space_id = ${space_id}`);
         if (!user_id)
-            throw new Error("missing user_id!");
+            throw new Error("user_id field is missing!");
 
         if (!user.length)
-            throw new Error("user is not in space");
+            throw new Error("user is not in this space");
         const [member] = await dbPool.query(`SELECT user_id 
                                              FROM spaces_members 
                                              WHERE user_id = ${user_id} AND space_id = ${space_id}`);
         if (member.length)
-            throw new Error("user was in space");
+            throw new Error("user was in this space");
         await dbPool.query(`INSERT INTO spaces_members(user_id, space_id, role_id) 
                             VALUES (${user_id}, ${space_id}, 2)`);
         let [group_id] = await dbPool.query(`SELECT id 
@@ -91,12 +91,12 @@ async function getListMember(req, res) {
     const {space_id} = req.body;
     try {
         if (!space_id)
-            throw new Error("missing space_id!");
+            throw new Error("space_id field is missing!");
         const [user] = await dbPool.query(`SELECT user_id 
                                            FROM spaces_members 
                                            WHERE user_id = ${id} AND space_id = ${space_id}`);
         if (!user.length)
-            throw new Error("user is not in space");
+            throw new Error("user is not in this space");
         const [rows] = await dbPool.query(`SELECT user_id, accounts.user_name, accounts.full_name 
                                            FROM spaces_members 
                                            INNER JOIN accounts ON user_id = accounts.id 
@@ -121,14 +121,14 @@ async function removeMember(req, res){
                                            FROM spaces_members
                                            WHERE user_id = ${id} AND space_id = ${space_id}`);
         if(!user.length)
-            throw new Error("user is not in space");
+            throw new Error("user is not in this space");
         if(!user_id)
             throw new Error("user_id field is missing");
         let [member_id] = await dbPool.query(`SELECT user_id 
                                               FROM spaces_members
                                               WHERE user_id = ${user_id} AND space_id = ${space_id}`);
         if(!member_id.length)
-            throw new Error("user account is not in space!");
+            throw new Error("user account is not in this space!");
         // let [member_role] = await dbPool.query(`SELECT role_id
         //                                         FROM spaces_members
         //                                         WHERE user_id = ${id} AND space_id = ${space_id}`);
@@ -161,7 +161,7 @@ async function leaveSpace (req, res){
                                          FROM spaces_members
                                          WHERE user_id = ${id} AND space_id = ${space_id}`);
         if(!user.length)
-            throw new Error("user account is not in space");
+            throw new Error("user account is not in this space");
         // let [member_role] = await dbPool.query(`SELECT role_id
         //                                         FROM spaces_members
         //                                         WHERE user_id = ${id} AND space_id = ${space_id}`);

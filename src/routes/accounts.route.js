@@ -7,5 +7,6 @@ const accountsController = require("../controllers/accounts.controller");
 router.get("/", token.verify, privileges.verify(1), accountsController.getAccounts);
 router.post("/register", accountsController.register);
 router.post("/login", accountsController.login);
+router.get("/spaces/:space_id", token.verify, accountsController.getCurrentSpaceToken);
 
 module.exports = router;

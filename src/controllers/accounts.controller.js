@@ -75,8 +75,37 @@ async function register(req, res) {
     }
 }
 
+async function getCurrentSpaceToken(req, res) {
+    const {
+        space_id
+    } = req.params;
+
+    try {
+        const [rows] = await dbPool.query(`select * 
+                                                from spaces_members 
+                                                where space_id = ${space_id} and user_id = ${req.tokenData.id}`);
+        if (!rows.length) throw new Error("user isn't in this space");
+        const space_member_id = rows[0].id;
+        const twentyFourHours = 24 * 24 * 60 * 60 * 30;
+
+        const tokenSpace = jwt.sign({
+                id: req.tokenData.id,
+                space_member_id,
+                space_id
+            },
+            config.get('SECRET_KEY'), {
+                expiresIn: twentyFourHours
+            }
+        );
+        res.json(responseUtil.success({data: {tokenSpace}}));
+    } catch (err) {
+        res.json(responseUtil.fail({reason: err.message}));
+    }
+}
+
 module.exports = {
     getAccounts,
     register,
-    login
+    login,
+    getCurrentSpaceToken
 };

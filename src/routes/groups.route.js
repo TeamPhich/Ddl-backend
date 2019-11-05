@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const groupsController = require("../controllers/groups.controller")
-const token = require("../middleware/token");
+const token = require("../middleware/tokenLogin");
 
 router.get("/", token.verify, groupsController.getGroups)
 router.post("/", token.verify, groupsController.createGroup);

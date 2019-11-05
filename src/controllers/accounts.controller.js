@@ -93,7 +93,7 @@ async function getCurrentSpaceToken(req, res) {
                 space_member_id,
                 space_id
             },
-            config.get('SECRET_KEY'), {
+            config.get('SPACE_SECRET_KEY'), {
                 expiresIn: twentyFourHours
             }
         );

@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const token = require("../middleware/token");
+const token = require("../middleware/tokenLogin");
 const spacesController = require("../controllers/spaces.controller");
 
 router.post("/",token.verify ,spacesController.createSpace);

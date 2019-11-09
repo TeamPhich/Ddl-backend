@@ -86,7 +86,8 @@ async function getCurrentSpaceToken(req, res) {
                                                 where space_id = ${space_id} and user_id = ${req.tokenData.id}`);
         if (!rows.length) throw new Error("user isn't in this space");
         const space_member_id = rows[0].id;
-        const twentyFourHours = 24 * 24 * 60 * 60 * 30;
+        const now = Date.now().toString().slice(0, 10);
+        const expToken = req.tokenData.exp - now;
 
         const tokenSpace = jwt.sign({
                 id: req.tokenData.id,
@@ -94,7 +95,7 @@ async function getCurrentSpaceToken(req, res) {
                 space_id
             },
             config.get('SPACE_SECRET_KEY'), {
-                expiresIn: twentyFourHours
+                expiresIn: expToken
             }
         );
         res.json(responseUtil.success({data: {tokenSpace}}));

@@ -39,7 +39,7 @@ async function createSpace(req, res) {
 async function getListSpace(req, res) {
     try {
         const id = req.tokenData.id;
-        const [rows] = await dbPool.query(`select spaces.name, spaces_members.id 
+        const [rows] = await dbPool.query(`select spaces.name, spaces.id 
                                            from spaces_members
                                            inner join spaces on spaces_members.space_id = spaces.id
                                            where spaces_members.user_id = ${id}`);

@@ -59,7 +59,6 @@ async function addMember(req, res) {
                                            WHERE user_id = ${id} AND space_id = ${space_id}`);
         if (!user_id)
             throw new Error("user_id field is missing!");
-
         if (!user.length)
             throw new Error("user is not in this space");
         const [member] = await dbPool.query(`SELECT user_id 
@@ -104,14 +103,14 @@ async function getMemberList(req, res) {
     }
 }
 
-async function removeMember(req, res){
+async function removeMember(req, res) {
     const id = req.tokenData.id;
     const space_id = req.tokenData.space_id;
     const {
         user_id
     } = req.body;
-    try{
-        if(!user_id)
+    try {
+        if (!user_id)
             throw new Error("user_id field is missing");
         const [user] = await dbPool.query(`SELECT user_id, role_id
                                            FROM spaces_members
@@ -120,35 +119,33 @@ async function removeMember(req, res){
         let [member_id] = await dbPool.query(`SELECT * 
                                               FROM spaces_members
                                               WHERE user_id = ${user_id} AND space_id = ${space_id}`);
-        if(!member_id.length)
+        if (!member_id.length)
             throw new Error("user account is not in this space!");
         let [member] = await dbPool.query(`SELECT group_id,member_id 
                                            FROM groups_members 
                                            INNER JOIN spaces_members ON groups_members.member_id = spaces_members.id 
                                            WHERE spaces_members.user_id = ${user_id} AND spaces_members.space_id = ${space_id}`);
         const member_role = member[0].role_id;
-        if(user_role == 1){
-            if(member_role == 2){
-                for(let i = 0; i < member.length; i++){
+        if (user_role == 1) {
+            if (member_role == 2) {
+                for (let i = 0; i < member.length; i++) {
                     await dbPool.query(`DELETE FROM groups_members 
                                         WHERE member_id = ${member[i].member_id} AND group_id = ${member[i].group_id}`);
                 }
                 await dbPool.query(`DELETE FROM spaces_members
                                     WHERE user_id = ${user_id} AND space_id = ${space_id}`);
-            }
-            else
+            } else
                 throw new Error("you can not remove this user account!");
         }
-        if(user_role == 4){
-            if(member_role == 2 || member_role == 1){
-                for(let i = 0; i < member.length; i++){
+        if (user_role == 4) {
+            if (member_role == 2 || member_role == 1) {
+                for (let i = 0; i < member.length; i++) {
                     await dbPool.query(`DELETE FROM groups_members 
                                         WHERE member_id = ${member[i].member_id} AND group_id = ${member[i].group_id}`);
                 }
                 await dbPool.query(`DELETE FROM spaces_members
                                     WHERE user_id = ${user_id} AND space_id = ${space_id}`);
-            }
-            else
+            } else
                 throw new Error("you can not remove this user account!");
         }
         res.json(responseUtil.success({data: {}}));
@@ -156,10 +153,11 @@ async function removeMember(req, res){
         res.json(responseUtil.fail({reason: err.message}));
     }
 }
-async function leaveSpace (req, res){
+
+async function leaveSpace(req, res) {
     const id = req.tokenData.id;
     const space_id = req.tokenData.space_id;
-    try{
+    try {
         let [user] = await dbPool.query(`SELECT *
                                          FROM spaces_members
                                          WHERE user_id = ${id} AND space_id = ${space_id}`);
@@ -168,47 +166,47 @@ async function leaveSpace (req, res){
                                           FROM groups_members 
                                           INNER JOIN spaces_members ON groups_members.member_id = spaces_members.id 
                                           WHERE spaces_members.user_id = ${id} AND spaces_members.space_id = ${space_id}`);
-        if(user_role == 1 || user_role == 2){
-            for(let i = 0; i < member.length; i++){
+        if (user_role == 1 || user_role == 2) {
+            for (let i = 0; i < member.length; i++) {
                 await dbPool.query(`DELETE FROM groups_members 
                                     WHERE member_id = ${member[i].member_id} AND group_id = ${member[i].group_id}`);
             }
             await dbPool.query(`DELETE FROM spaces_members
                                 WHERE user_id = ${id} AND space_id = ${space_id}`);
-        }
-        else
+        } else
             throw new Error("super admin can not leave this space!");
         res.json(responseUtil.success({data: {}}));
-    } catch (err){
+    } catch (err) {
         res.json(responseUtil.fail({reason: err.message}));
     }
 };
-async function authorizeAdmin (req, res){
+
+async function authorizeAdmin(req, res) {
     const space_id = req.tokenData.space_id;
     const {
         user_id
     } = req.body;
-    try{
+    try {
         if (!user_id)
             throw new Error("user_id field is missing!");
         let [member_id] = await dbPool.query(`SELECT * 
                                               FROM spaces_members
                                               WHERE user_id = ${user_id} AND space_id = ${space_id}`);
-        if(!member_id.length)
+        if (!member_id.length)
             throw new Error("user account is not in this space!");
         const member_role = member_id[0].role_id;
-        if(member_role == 2){
+        if (member_role == 2) {
             await dbPool.query(`UPDATE spaces_members
                                 SET role_id = 1
                                 WHERE id = ${member_id[0].id}`);
-        }
-        else
+        } else
             throw new Error("user account has been granted in this space");
         res.json(responseUtil.success({data: {}}));
-    } catch (err){
+    } catch (err) {
         res.json(responseUtil.fail({reason: err.message}));
     }
 }
+
 module.exports = {
     createSpace,
     getSpaceList,

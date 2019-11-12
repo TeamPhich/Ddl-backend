@@ -6,6 +6,7 @@ const config = require("config");
 const accountsRoute = require("./routes/accounts.route");
 const spacesRoute = require("./routes/spaces.route");
 const groupsRoute= require("./routes/groups.route");
+const jobsRoute = require("./routes/jobs.route");
 
 const app = express();
 
@@ -18,6 +19,7 @@ app.use(morgan('combined'));
 app.use("/api/v1/accounts/", accountsRoute);
 app.use("/api/v1/spaces/", spacesRoute);
 app.use("/api/v1/groups", groupsRoute);
+app.use("/api/v1/jobs/", jobsRoute);
 
 app.use("/api/v1", (req, res) => {
     res.send("ddl-backend");

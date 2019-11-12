@@ -39,10 +39,10 @@ async function createSpace(req, res) {
 async function getSpaceList(req, res) {
     try {
         const id = req.tokenData.id;
-        const [rows] = await dbPool.query(`SELECT spaces.name, spaces_members.id 
-                                           FROM spaces_members
-                                           INNER JOIN spaces ON spaces_members.space_id = spaces.id
-                                           WHERE spaces_members.user_id = ${id}`);
+        const [rows] = await dbPool.query(`select spaces.name, spaces.id 
+                                           from spaces_members
+                                           inner join spaces on spaces_members.space_id = spaces.id
+                                           where spaces_members.user_id = ${id}`);
         res.json(responseUtil.success({data: {rows}}));
     } catch (err) {
         res.send(responseUtil.fail({reason: err.message}))
@@ -126,8 +126,8 @@ async function removeMember(req, res) {
                                            INNER JOIN spaces_members ON groups_members.member_id = spaces_members.id 
                                            WHERE spaces_members.user_id = ${user_id} AND spaces_members.space_id = ${space_id}`);
         const member_role = member[0].role_id;
-        if (user_role == 1) {
-            if (member_role == 2) {
+        if (user_role === 1) {
+            if (member_role === 2) {
                 for (let i = 0; i < member.length; i++) {
                     await dbPool.query(`DELETE FROM groups_members 
                                         WHERE member_id = ${member[i].member_id} AND group_id = ${member[i].group_id}`);
@@ -137,8 +137,8 @@ async function removeMember(req, res) {
             } else
                 throw new Error("you can not remove this user account!");
         }
-        if (user_role == 4) {
-            if (member_role == 2 || member_role == 1) {
+        if (user_role === 4) {
+            if (member_role === 2 || member_role === 1) {
                 for (let i = 0; i < member.length; i++) {
                     await dbPool.query(`DELETE FROM groups_members 
                                         WHERE member_id = ${member[i].member_id} AND group_id = ${member[i].group_id}`);
@@ -158,23 +158,16 @@ async function leaveSpace(req, res) {
     const id = req.tokenData.id;
     const space_id = req.tokenData.space_id;
     try {
-        let [user] = await dbPool.query(`SELECT *
-                                         FROM spaces_members
-                                         WHERE user_id = ${id} AND space_id = ${space_id}`);
-        const user_role = user[0].role_id;
         let [member] = await dbPool.query(`SELECT group_id, member_id 
                                           FROM groups_members 
                                           INNER JOIN spaces_members ON groups_members.member_id = spaces_members.id 
                                           WHERE spaces_members.user_id = ${id} AND spaces_members.space_id = ${space_id}`);
-        if (user_role == 1 || user_role == 2) {
-            for (let i = 0; i < member.length; i++) {
-                await dbPool.query(`DELETE FROM groups_members 
+        for (let i = 0; i < member.length; i++) {
+            await dbPool.query(`DELETE FROM groups_members 
                                     WHERE member_id = ${member[i].member_id} AND group_id = ${member[i].group_id}`);
-            }
-            await dbPool.query(`DELETE FROM spaces_members
+        }
+        await dbPool.query(`DELETE FROM spaces_members
                                 WHERE user_id = ${id} AND space_id = ${space_id}`);
-        } else
-            throw new Error("super admin can not leave this space!");
         res.json(responseUtil.success({data: {}}));
     } catch (err) {
         res.json(responseUtil.fail({reason: err.message}));
@@ -195,12 +188,12 @@ async function authorizeAdmin(req, res) {
         if (!member_id.length)
             throw new Error("user account is not in this space!");
         const member_role = member_id[0].role_id;
-        if (member_role == 2) {
+        if (member_role === 2) {
             await dbPool.query(`UPDATE spaces_members
                                 SET role_id = 1
                                 WHERE id = ${member_id[0].id}`);
         } else
-            throw new Error("user account has been granted in this space");
+            throw new Error("user account has not been granted in this space");
         res.json(responseUtil.success({data: {}}));
     } catch (err) {
         res.json(responseUtil.fail({reason: err.message}));

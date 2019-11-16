@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 const secretKey = require('config').get("SPACE_SECRET_KEY");
 
 function verify(req, res, next) {
-    const space_token = req.headers['space_token'];
+    const space_token = req.headers['space-token'];
 
     if (space_token) {
         jwt.verify(space_token, secretKey, (err, decoded) => {

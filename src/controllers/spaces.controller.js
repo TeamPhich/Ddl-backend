@@ -39,10 +39,10 @@ async function createSpace(req, res) {
 async function getSpaceList(req, res) {
     try {
         const id = req.tokenData.id;
-        const [rows] = await dbPool.query(`select spaces.name, spaces.id 
-                                           from spaces_members
-                                           inner join spaces on spaces_members.space_id = spaces.id
-                                           where spaces_members.user_id = ${id}`);
+        const [rows] = await dbPool.query(`SELECT spaces.name, spaces.id 
+                                           FROM spaces_members
+                                           INNER JOIN spaces ON spaces_members.space_id = spaces.id
+                                           WHERE spaces_members.user_id = ${id}`);
         res.json(responseUtil.success({data: {rows}}));
     } catch (err) {
         res.send(responseUtil.fail({reason: err.message}))
@@ -93,13 +93,12 @@ async function getMemberList(req, res) {
                                            WHERE space_id = ${space_id}`);
         res.json(responseUtil.success({data: {rows}}));
     } catch (err) {
-        res.send(responseUtil.fail({reason: err.message}))
+        res.send(responseUtil.fail({reason: err.message}));
     }
 }
 
 async function removeMember(req, res) {
     const space_id = req.tokenData.space_id;
-
     const {
         member_id
     } = req.body;
@@ -125,15 +124,15 @@ async function leaveSpace(req, res) {
     const space_id = req.tokenData.space_id;
     try {
         let [member] = await dbPool.query(`SELECT group_id, member_id 
-                                          FROM groups_members 
-                                          INNER JOIN spaces_members ON groups_members.member_id = spaces_members.id 
-                                          WHERE spaces_members.user_id = ${id} AND spaces_members.space_id = ${space_id}`);
+                                           FROM groups_members 
+                                           INNER JOIN spaces_members ON groups_members.member_id = spaces_members.id 
+                                           WHERE spaces_members.user_id = ${id} AND spaces_members.space_id = ${space_id}`);
         for (let i = 0; i < member.length; i++) {
             await dbPool.query(`DELETE FROM groups_members 
                                 WHERE member_id = ${member[i].member_id} AND group_id = ${member[i].group_id}`);
         }
         await dbPool.query(`DELETE FROM spaces_members
-                                WHERE user_id = ${id} AND space_id = ${space_id}`);
+                            WHERE user_id = ${id} AND space_id = ${space_id}`);
         res.json(responseUtil.success({data: {}}));
     } catch (err) {
         res.json(responseUtil.fail({reason: err.message}));

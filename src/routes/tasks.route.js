@@ -12,6 +12,6 @@ router.get("/members", tokenLogin.verify, tasksController.getTaskListOfMember);
 router.get("/creators", tokenLogin.verify, tasksController.getTaskListOfCreator);
 router.get("/status", tokenCurrentSpace.verify, tasksController.getStatusTaskList);
 router.put("/status", tokenCurrentSpace.verify, tasksController.updateTaskStatus);
-router.put("/", tokenCurrentSpace.verify, tasksController.updateTask);
+router.put("/", tokenCurrentSpace.verify, member.spaceVerify, tasksController.updateTask);
 router.delete("/", tokenCurrentSpace.verify, privilege.verify(6), tasksController.deleteTask);
 module.exports = router;

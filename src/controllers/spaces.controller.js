@@ -111,6 +111,7 @@ async function removeMember(req, res) {
             await dbPool.query(`DELETE FROM groups_members 
                                 WHERE member_id = ${member[i].member_id} AND group_id = ${member[i].group_id}`);
         }
+
         await dbPool.query(`DELETE FROM spaces_members
                             WHERE id = ${member_id} AND space_id = ${space_id}`);
         res.json(responseUtil.success({data: {}}));

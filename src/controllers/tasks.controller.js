@@ -25,6 +25,8 @@ async function createTask(req, res) {
         let create_time = Date.now() / 1000;
         if (rows.length)
             throw new Error("task has been already existed!");
+        if(deadline <= create_time)
+            throw new Error("deadline must be later than created timestamp");
         await dbPool.query(`INSERT INTO jobs(space_id, creator_id, member_id, title, description, deadline, create_time, status)
                             VALUES (${space_id}, ${creator_id}, ${member_id}, "${title}", "${description}", ${deadline}, ${create_time}, "todo")`);
         res.json(responseUtil.success({data: {}}));
@@ -120,7 +122,7 @@ async function updateTaskStatus(req, res) {
                                             WHERE id = ${task_id}`);
         let member_id = user_id[0].member_id;
         let creator_id = user_id[0].creator_id;
-        if(space_member_id === creator_id || space_member_id === member_id)
+        if (space_member_id === creator_id || space_member_id === member_id)
             await dbPool.query(`UPDATE jobs
                                 SET status = "${status}"
                                 WHERE id = ${task_id}`);
@@ -136,14 +138,50 @@ async function updateTaskStatus(req, res) {
 async function updateTask(req, res) {
     const creator_id = req.tokenData.space_member_id;
     const {
-
+        task_id,
+        member_id,
+        title,
+        description,
+        deadline
     } = req.body;
     try {
+        let [task] = await dbPool.query(`SELECT *
+                                         FROM jobs
+                                         WHERE id = ${task_id}`);
+        if (!task_id)
+            throw new Error("task_id field is missing");
+        let creator = task[0].creator_id;
+        if (creator !== creator_id)
+            throw new Error("You haven't been granted privilege for this function");
+        if (member_id) {
+            await dbPool.query(`UPDATE jobs
+                                INNER JOIN spaces_members ON spaces_members.space_id = jobs.space_id
+                                SET jobs.member_id = ${member_id}
+                                WHERE jobs.id = 9`);
+            await dbPool.query(`UPDATE jobs
+                                SET status = "todo"
+                                WHERE id = ${task_id}`);
+        }
+        if (title)
+            await dbPool.query(`UPDATE jobs
+                                SET title = "${title}"
+                                WHERE id = ${task_id}`);
+        if (description)
+            await dbPool.query(`UPDATE jobs
+                                SET description = "${description}"
+                                WHERE id = ${task_id}`);
+        if (deadline) {
+            let update_time = Date.now() / 1000;
+            if (deadline <= update_time)
+                throw new Error("deadline must be later than updated timestamp");
+            await dbPool.query(`UPDATE jobs
+                                SET deadline = ${deadline}
+                                WHERE id = ${task_id}`);
+        }
         res.json(responseUtil.success({data: {}}));
     } catch (err) {
         res.json(responseUtil.fail({reason: err.message}))
     }
-
 }
 
 async function deleteTask(req, res) {

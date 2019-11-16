@@ -2,7 +2,7 @@ process.env.NODE_ENV = 'dev';
 
 let chai = require('chai');
 let chaiHttp = require('chai-http');
-let server = require('../src/app');
+let server = require('../src/app.express');
 let should = chai.should();
 
 chai.use(chaiHttp);

@@ -157,7 +157,7 @@ async function updateTask(req, res) {
             await dbPool.query(`UPDATE jobs
                                 INNER JOIN spaces_members ON spaces_members.space_id = jobs.space_id
                                 SET jobs.member_id = ${member_id}
-                                WHERE jobs.id = 9`);
+                                WHERE jobs.id = ${task_id}`);
             await dbPool.query(`UPDATE jobs
                                 SET status = "todo"
                                 WHERE id = ${task_id}`);

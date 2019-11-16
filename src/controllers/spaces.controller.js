@@ -111,11 +111,16 @@ async function removeMember(req, res) {
             await dbPool.query(`DELETE FROM groups_members 
                                 WHERE member_id = ${member[i].member_id} AND group_id = ${member[i].group_id}`);
         }
-        let [task] = await dbPool.query(`SELECT id
+        let [task] = await dbPool.query(`SELECT id, creator_id
                                          FROM jobs
                                          WHERE space_id = ${space_id} AND member_id = ${member_id}`);
         for (let i = 0; i < task.length; i++) {
-            await dbPool.query(`DELETE FROM jobs
+            await dbPool.query(`UPDATE jobs
+                                INNER JOIN spaces_members ON spaces_members.space_id = jobs.space_id
+                                SET jobs.member_id = ${task[i].creator_id}
+                                WHERE jobs.id = ${task[i].id}`);
+            await dbPool.query(`UPDATE jobs
+                                SET status = "todo"
                                 WHERE id = ${task[i].id}`);
         }
         await dbPool.query(`DELETE FROM spaces_members
@@ -138,11 +143,16 @@ async function leaveSpace(req, res) {
             await dbPool.query(`DELETE FROM groups_members 
                                 WHERE member_id = ${member[i].member_id} AND group_id = ${member[i].group_id}`);
         }
-        let [task] = await dbPool.query(`SELECT id
+        let [task] = await dbPool.query(`SELECT id, creator_id
                                          FROM jobs
                                          WHERE space_id = ${space_id} AND member_id = ${member[0].member_id}`);
         for (let i = 0; i < task.length; i++) {
-            await dbPool.query(`DELETE FROM jobs
+            await dbPool.query(`UPDATE jobs
+                                INNER JOIN spaces_members ON spaces_members.space_id = jobs.space_id
+                                SET jobs.member_id = ${task[i].creator_id}
+                                WHERE jobs.id = ${task[i].id}`);
+            await dbPool.query(`UPDATE jobs
+                                SET status = "todo"
                                 WHERE id = ${task[i].id}`);
         }
         await dbPool.query(`DELETE FROM spaces_members

@@ -25,7 +25,7 @@ async function createTask(req, res) {
         let create_time = Date.now() / 1000;
         if (rows.length)
             throw new Error("task has been already existed!");
-        if(deadline <= create_time)
+        if (deadline <= create_time)
             throw new Error("deadline must be later than created timestamp");
         await dbPool.query(`INSERT INTO jobs(space_id, creator_id, member_id, title, description, deadline, create_time, status)
                             VALUES (${space_id}, ${creator_id}, ${member_id}, "${title}", "${description}", ${deadline}, ${create_time}, "todo")`);

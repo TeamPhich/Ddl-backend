@@ -111,7 +111,13 @@ async function removeMember(req, res) {
             await dbPool.query(`DELETE FROM groups_members 
                                 WHERE member_id = ${member[i].member_id} AND group_id = ${member[i].group_id}`);
         }
-
+        let [task] = await dbPool.query(`SELECT id
+                                         FROM jobs
+                                         WHERE space_id = ${space_id} AND member_id = ${member_id}`);
+        for (let i = 0; i < task.length; i++) {
+            await dbPool.query(`DELETE FROM jobs
+                                WHERE id = ${task[i].id}`);
+        }
         await dbPool.query(`DELETE FROM spaces_members
                             WHERE id = ${member_id} AND space_id = ${space_id}`);
         res.json(responseUtil.success({data: {}}));
@@ -131,6 +137,13 @@ async function leaveSpace(req, res) {
         for (let i = 0; i < member.length; i++) {
             await dbPool.query(`DELETE FROM groups_members 
                                 WHERE member_id = ${member[i].member_id} AND group_id = ${member[i].group_id}`);
+        }
+        let [task] = await dbPool.query(`SELECT id
+                                         FROM jobs
+                                         WHERE space_id = ${space_id} AND member_id = ${member[0].member_id}`);
+        for (let i = 0; i < task.length; i++) {
+            await dbPool.query(`DELETE FROM jobs
+                                WHERE id = ${task[i].id}`);
         }
         await dbPool.query(`DELETE FROM spaces_members
                             WHERE user_id = ${id} AND space_id = ${space_id}`);

@@ -8,7 +8,7 @@ const member = require("../middleware/members");
 const roleLayer = require("../middleware/roleLayer");
 
 router.post("/", tokenLogin.verify, spacesController.createSpace);
-router.get("/", tokenLogin.verify, spacesController.getSpaceList);
+router.get("/", tokenCurrentSpace.verify, spacesController.getSpaceList);
 router.post("/members", tokenCurrentSpace.verify, spacesController.addMember);
 router.get("/members", tokenCurrentSpace.verify, spacesController.getMemberList);
 router.delete("/members", tokenCurrentSpace.verify, member.spaceVerify, privilege.verify(2), roleLayer.verify, spacesController.removeMember);

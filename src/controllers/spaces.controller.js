@@ -58,9 +58,10 @@ async function addMember(req, res) {
         const [memberInformation] = await dbPool.query(`select * from accounts where user_name = ${member_username}`);
         if(!memberInformation.length)
             throw new Error("username don't existed");
+        const member_id = memberInformation[0].id;
         const [member] = await dbPool.query(`SELECT user_id 
                                              FROM spaces_members 
-                                             WHERE user_id = ${memberInformation[0].id} AND space_id = ${space_id}`);
+                                             WHERE user_id = ${member_id} AND space_id = ${space_id}`);
         if (member.length)
             throw new Error("user has been in this space");
         await dbPool.query(`INSERT INTO spaces_members(user_id, space_id, role_id) 

@@ -39,10 +39,10 @@ async function createSpace(req, res) {
 async function getSpaceList(req, res) {
     try {
         const id = req.tokenData.id;
-        const [rows] = await dbPool.query(`select spaces.name, spaces.id 
-                                           from spaces_members
-                                           inner join spaces on spaces_members.space_id = spaces.id
-                                           where spaces_members.user_id = ${id}`);
+        const [rows] = await dbPool.query(`SELECT spaces.name, spaces.id 
+                                           FROM spaces_members
+                                           INNER JOIN spaces ON spaces_members.space_id = spaces.id
+                                           WHERE spaces_members.user_id = ${id}`);
         res.json(responseUtil.success({data: {rows}}));
     } catch (err) {
         res.send(responseUtil.fail({reason: err.message}))
@@ -51,10 +51,15 @@ async function getSpaceList(req, res) {
 
 async function addMember(req, res) {
     const space_id = req.tokenData.space_id;
-    const {member_id} = req.body;
+    const {member_username} = req.body;
     try {
-        if (!member_id)
-            throw new Error("user_id field is missing!");
+        if (!member_username)
+            throw new Error("member_username field is missing!");
+        const [memberInformation] = await dbPool.query(`select * from accounts 
+                                    where user_name = "${member_username}"`);
+        if(!memberInformation.length)
+            throw new Error("username don't existed");
+        const member_id = memberInformation[0].id;
         const [member] = await dbPool.query(`SELECT user_id 
                                              FROM spaces_members 
                                              WHERE user_id = ${member_id} AND space_id = ${space_id}`);
@@ -87,19 +92,18 @@ async function getMemberList(req, res) {
                                            WHERE user_id = ${id} AND space_id = ${space_id}`);
         if (!user.length)
             throw new Error("user is not in this space");
-        const [rows] = await dbPool.query(`SELECT  spaces_members.id, user_id, accounts.user_name, accounts.full_name
+        const [rows] = await dbPool.query(`SELECT spaces_members.id, user_id, accounts.user_name, accounts.full_name
                                            FROM spaces_members 
                                            INNER JOIN accounts ON user_id = accounts.id 
                                            WHERE space_id = ${space_id}`);
         res.json(responseUtil.success({data: {rows}}));
     } catch (err) {
-        res.send(responseUtil.fail({reason: err.message}))
+        res.send(responseUtil.fail({reason: err.message}));
     }
 }
 
 async function removeMember(req, res) {
     const space_id = req.tokenData.space_id;
-
     const {
         member_id
     } = req.body;
@@ -111,6 +115,18 @@ async function removeMember(req, res) {
         for (let i = 0; i < member.length; i++) {
             await dbPool.query(`DELETE FROM groups_members 
                                 WHERE member_id = ${member[i].member_id} AND group_id = ${member[i].group_id}`);
+        }
+        let [task] = await dbPool.query(`SELECT id, creator_id
+                                         FROM jobs
+                                         WHERE space_id = ${space_id} AND member_id = ${member_id}`);
+        for (let i = 0; i < task.length; i++) {
+            await dbPool.query(`UPDATE jobs
+                                INNER JOIN spaces_members ON spaces_members.space_id = jobs.space_id
+                                SET jobs.member_id = ${task[i].creator_id}
+                                WHERE jobs.id = ${task[i].id}`);
+            await dbPool.query(`UPDATE jobs
+                                SET status = "todo"
+                                WHERE id = ${task[i].id}`);
         }
         await dbPool.query(`DELETE FROM spaces_members
                             WHERE id = ${member_id} AND space_id = ${space_id}`);
@@ -125,15 +141,27 @@ async function leaveSpace(req, res) {
     const space_id = req.tokenData.space_id;
     try {
         let [member] = await dbPool.query(`SELECT group_id, member_id 
-                                          FROM groups_members 
-                                          INNER JOIN spaces_members ON groups_members.member_id = spaces_members.id 
-                                          WHERE spaces_members.user_id = ${id} AND spaces_members.space_id = ${space_id}`);
+                                           FROM groups_members 
+                                           INNER JOIN spaces_members ON groups_members.member_id = spaces_members.id 
+                                           WHERE spaces_members.user_id = ${id} AND spaces_members.space_id = ${space_id}`);
         for (let i = 0; i < member.length; i++) {
             await dbPool.query(`DELETE FROM groups_members 
                                 WHERE member_id = ${member[i].member_id} AND group_id = ${member[i].group_id}`);
         }
+        let [task] = await dbPool.query(`SELECT id, creator_id
+                                         FROM jobs
+                                         WHERE space_id = ${space_id} AND member_id = ${member[0].member_id}`);
+        for (let i = 0; i < task.length; i++) {
+            await dbPool.query(`UPDATE jobs
+                                INNER JOIN spaces_members ON spaces_members.space_id = jobs.space_id
+                                SET jobs.member_id = ${task[i].creator_id}
+                                WHERE jobs.id = ${task[i].id}`);
+            await dbPool.query(`UPDATE jobs
+                                SET status = "todo"
+                                WHERE id = ${task[i].id}`);
+        }
         await dbPool.query(`DELETE FROM spaces_members
-                                WHERE user_id = ${id} AND space_id = ${space_id}`);
+                            WHERE user_id = ${id} AND space_id = ${space_id}`);
         res.json(responseUtil.success({data: {}}));
     } catch (err) {
         res.json(responseUtil.fail({reason: err.message}));

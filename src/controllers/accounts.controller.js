@@ -37,13 +37,13 @@ async function login(req, res) {
 
         const token = jwt.sign({
                 id: user.id,
-                email: user.email
+                email: user.email,
+                image: "https://ca.slack-edge.com/T89HLCYH4-U89HSN2ES-g704cfc05be7-512?fbclid=IwAR2-vqXJyxocQzluw-ppk8m242HGDy_cMzN9oPfqAeXUVIvyeSmQuqdNJTI"
             },
             config.get('SECRET_KEY'), {
                 expiresIn: twentyFourHours
             }
         );
-
         res.json(responseUtil.success({data: {token}}));
 
     } catch (err) {

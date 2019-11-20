@@ -69,9 +69,8 @@ async function register(req, res) {
         if (existEmail.length) throw new Error("email existed");
         let salt = await bcrypt.genSalt(10);
         let hashPassword = await bcrypt.hash(password, salt);
-        const imageDefaultUrl = "https://ca.slack-edge.com/T89HLCYH4-U89HSN2ES-g704cfc05be7-512";
-        await dbPool.query(`insert into accounts (user_name, password, email, full_name, imageUrl) 
-        values ("${user_name}", "${hashPassword}", "${email}", "${full_name}", "${imageDefaultUrl}")`);
+        await dbPool.query(`insert into accounts (user_name, password, email, full_name) 
+        values ("${user_name}", "${hashPassword}", "${email}", "${full_name}")`);
 
         res.json(responseUtil.success({data: {}}))
 

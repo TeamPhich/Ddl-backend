@@ -4,10 +4,14 @@ const config = require("config");
 const jwt = require("jsonwebtoken");
 const responseUtil = require("../utils/response.util");
 
-async function getAccounts(req, res) {
+async function searchAccounts(req, res) {
     try {
-        const [rows] = await dbPool.query("select * from accounts");
-        res.send(responseUtil.success({data: rows}));
+        const {keywords} = req.query;
+        const [accounts] = await dbPool.query(`SELECT accounts.user_name, accounts.id FROM accounts
+                                             where MATCH(user_name)
+                                             AGAINST('+${keywords}*' IN boolean MODE)
+                                             limit 6`);
+        res.send(responseUtil.success({data: {accounts}}));
     } catch (err) {
         res.send(responseUtil.fail({reason: err.message}))
     }
@@ -105,7 +109,7 @@ async function getCurrentSpaceToken(req, res) {
 }
 
 module.exports = {
-    getAccounts,
+    searchAccounts,
     register,
     login,
     getCurrentSpaceToken

@@ -37,8 +37,7 @@ async function login(req, res) {
 
         const token = jwt.sign({
                 id: user.id,
-                email: user.email,
-                image: "https://ca.slack-edge.com/T89HLCYH4-U89HSN2ES-g704cfc05be7-512?fbclid=IwAR2-vqXJyxocQzluw-ppk8m242HGDy_cMzN9oPfqAeXUVIvyeSmQuqdNJTI"
+                email: user.email
             },
             config.get('SECRET_KEY'), {
                 expiresIn: twentyFourHours
@@ -70,7 +69,9 @@ async function register(req, res) {
         if (existEmail.length) throw new Error("email existed");
         let salt = await bcrypt.genSalt(10);
         let hashPassword = await bcrypt.hash(password, salt);
-        await dbPool.query(`insert into accounts (user_name, password, email, full_name) values ("${user_name}", "${hashPassword}", "${email}", "${full_name}")`);
+        const imageDefaultUrl = "https://ca.slack-edge.com/T89HLCYH4-U89HSN2ES-g704cfc05be7-512";
+        await dbPool.query(`insert into accounts (user_name, password, email, full_name, imageUrl) 
+        values ("${user_name}", "${hashPassword}", "${email}", "${full_name}", "${imageDefaultUrl}")`);
 
         res.json(responseUtil.success({data: {}}))
 

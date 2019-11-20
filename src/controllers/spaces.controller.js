@@ -51,13 +51,16 @@ async function getSpaceList(req, res) {
 
 async function addMember(req, res) {
     const space_id = req.tokenData.space_id;
-    const {member_id} = req.body;
+    const {member_username} = req.body;
     try {
-        if (!member_id)
-            throw new Error("user_id field is missing!");
+        if (!member_username)
+            throw new Error("member_username field is missing!");
+        const [memberInformation] = await dbPool.query(`select * from accounts where user_name = ${member_username}`);
+        if(!memberInformation.length)
+            throw new Error("username don't existed");
         const [member] = await dbPool.query(`SELECT user_id 
                                              FROM spaces_members 
-                                             WHERE user_id = ${member_id} AND space_id = ${space_id}`);
+                                             WHERE user_id = ${memberInformation[0].id} AND space_id = ${space_id}`);
         if (member.length)
             throw new Error("user has been in this space");
         await dbPool.query(`INSERT INTO spaces_members(user_id, space_id, role_id) 

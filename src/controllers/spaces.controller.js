@@ -55,7 +55,8 @@ async function addMember(req, res) {
     try {
         if (!member_username)
             throw new Error("member_username field is missing!");
-        const [memberInformation] = await dbPool.query(`select * from accounts where user_name = ${member_username}`);
+        const [memberInformation] = await dbPool.query(`select * from accounts 
+                                    where user_name = "${member_username}"`);
         if(!memberInformation.length)
             throw new Error("username don't existed");
         const member_id = memberInformation[0].id;
@@ -91,7 +92,7 @@ async function getMemberList(req, res) {
                                            WHERE user_id = ${id} AND space_id = ${space_id}`);
         if (!user.length)
             throw new Error("user is not in this space");
-        const [rows] = await dbPool.query(`SELECT  spaces_members.id, user_id, accounts.user_name, accounts.full_name
+        const [rows] = await dbPool.query(`SELECT spaces_members.id, user_id, accounts.user_name, accounts.full_name
                                            FROM spaces_members 
                                            INNER JOIN accounts ON user_id = accounts.id 
                                            WHERE space_id = ${space_id}`);

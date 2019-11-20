@@ -47,9 +47,26 @@ async function createTask(req, res) {
         res.json(responseUtil.fail({reason: err.message}))
     }
 }
-async function getTaskList (req, res) {
+
+async function deleteTask(req, res) {
+    const user_id = req.tokenData.id;
+    const space_id = req.tokenData.space_id
+    const {
+        job_id
+    } = req.body;
+    try {
+        if (!job_id)
+            throw new Error("job_id is missing");
+            let temp = await dbPool.query(``);
+    } catch (err) {
+        res.json(responseUtil.fail({reason: err.message}))
+    }
+}
+
+async function getTaskList(req, res) {
 
 }
+
 module.exports = {
     createTask
 };

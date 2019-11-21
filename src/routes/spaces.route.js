@@ -14,5 +14,6 @@ router.get("/members", tokenCurrentSpace.verify, spacesController.getMemberList)
 router.delete("/members", tokenCurrentSpace.verify, member.spaceVerify, privilege.verify(2), roleLayer.verify, spacesController.removeMember);
 router.delete("/leavings", tokenCurrentSpace.verify, privilege.verify(5), spacesController.leaveSpace);
 router.put("/admins", tokenCurrentSpace.verify, member.spaceVerify, privilege.verify(3), roleLayer.verify ,spacesController.authorizeAdmin);
+router.delete("/", tokenCurrentSpace.verify, privilege.verify(8), spacesController.deleteSpace);
 
 module.exports = router;

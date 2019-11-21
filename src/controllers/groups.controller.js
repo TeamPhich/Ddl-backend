@@ -2,12 +2,9 @@ const dbPool = require("../db");
 const responseUtil = require("../utils/response.util");
 
 async function getGroups(req, res) {
-    const {
-        space_id
-    } = req.body;
     try {
         const id = req.tokenData.id;
-        if (!space_id) throw new Error("space_id field is missing");
+        const space_id = req.tokenData.space_id;
         const [temp_id] = await dbPool.query(`  SELECT * FROM spaces_members                                            
                                                 WHERE spaces_members.user_id = "${id}"
                                                 AND spaces_members.space_id = "${space_id}"`);
@@ -25,12 +22,11 @@ async function getGroups(req, res) {
 
 async function createGroup(req, res) {
     const {
-        space_id,
         name,
         couple
     } = req.body;
     try {
-        if (!space_id) throw new Error("space_id field is missing");
+        const space_id = req.tokenData.space_id;
         if (!name) throw new Error("name field is missing");
         if (!couple) throw new Error("couple field is missing");
         const id = req.tokenData.id;
@@ -54,7 +50,7 @@ async function addMembers(req, res) {
     const {
         member_ids,
         group_id
-    } = req.body
+    } = req.body;
     try {
         const id = req.tokenData.id;
         const [temp_id] = await dbPool.query(`  SELECT * FROM spaces_members

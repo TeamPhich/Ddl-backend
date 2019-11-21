@@ -4,10 +4,14 @@ const config = require("config");
 const jwt = require("jsonwebtoken");
 const responseUtil = require("../utils/response.util");
 
-async function getAccounts(req, res) {
+async function searchAccounts(req, res) {
     try {
-        const [rows] = await dbPool.query("select * from accounts");
-        res.send(responseUtil.success({data: rows}));
+        const {keywords} = req.query;
+        const [accounts] = await dbPool.query(`SELECT accounts.user_name, accounts.id FROM accounts
+                                             where MATCH(user_name)
+                                             AGAINST('+${keywords}*' IN boolean MODE)
+                                             limit 6`);
+        res.send(responseUtil.success({data: {accounts}}));
     } catch (err) {
         res.send(responseUtil.fail({reason: err.message}))
     }
@@ -39,7 +43,6 @@ async function login(req, res) {
                 expiresIn: twentyFourHours
             }
         );
-
         res.json(responseUtil.success({data: {token}}));
 
     } catch (err) {
@@ -66,7 +69,8 @@ async function register(req, res) {
         if (existEmail.length) throw new Error("email existed");
         let salt = await bcrypt.genSalt(10);
         let hashPassword = await bcrypt.hash(password, salt);
-        await dbPool.query(`insert into accounts (user_name, password, email, full_name) values ("${user_name}", "${hashPassword}", "${email}", "${full_name}")`);
+        await dbPool.query(`insert into accounts (user_name, password, email, full_name) 
+        values ("${user_name}", "${hashPassword}", "${email}", "${full_name}")`);
 
         res.json(responseUtil.success({data: {}}))
 
@@ -105,7 +109,7 @@ async function getCurrentSpaceToken(req, res) {
 }
 
 module.exports = {
-    getAccounts,
+    searchAccounts,
     register,
     login,
     getCurrentSpaceToken

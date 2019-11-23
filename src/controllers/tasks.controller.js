@@ -79,7 +79,7 @@ async function getTaskListOfCreator(req, res) {
 
 async function getStatusTaskList(req, res) {
     const space_id = req.tokenData.space_id;
-    const status = req.body.status;
+    const status = req.query.status;
     try {
         if (!status)
             throw new Error("status field id missing");

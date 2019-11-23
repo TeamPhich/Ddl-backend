@@ -93,7 +93,11 @@ async function getMemberList(req, res) {
                                            WHERE user_id = ${id} AND space_id = ${space_id}`);
         if (!user.length)
             throw new Error("user is not in this space");
+
         if(member_id) {
+            const [memberIsInSpace] = await dbPool.query(`SELECT * FROM spaces_members 
+                                                                WHERE id = ${member_id} and space_id = ${space_id}`);
+            if(!memberIsInSpace.length) throw new Error("Member who you sent isn't in this space.");
             const [memberInformation] = await dbPool.query(`SELECT spaces_members.id, user_id, accounts.user_name, accounts.full_name, spaces_members.imagesUrl
                                            FROM spaces_members 
                                            INNER JOIN accounts ON user_id = accounts.id 

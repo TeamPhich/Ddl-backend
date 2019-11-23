@@ -86,17 +86,27 @@ async function addMember(req, res) {
 async function getMemberList(req, res) {
     const id = req.tokenData.id;
     const space_id = req.tokenData.space_id;
+    const {member_id} = req.query;
     try {
         const [user] = await dbPool.query(`SELECT user_id
                                            FROM spaces_members
                                            WHERE user_id = ${id} AND space_id = ${space_id}`);
         if (!user.length)
             throw new Error("user is not in this space");
-        const [rows] = await dbPool.query(`SELECT spaces_members.id, user_id, accounts.user_name, accounts.full_name, spaces_members.imagesUrl
+        if(member_id) {
+            const [memberInformation] = await dbPool.query(`SELECT spaces_members.id, user_id, accounts.user_name, accounts.full_name, spaces_members.imagesUrl
+                                           FROM spaces_members 
+                                           INNER JOIN accounts ON user_id = accounts.id 
+                                           WHERE spaces_members.id = ${member_id}`);
+            res.json(responseUtil.success({data: {memberInformation}}));
+        } else {
+            const [rows] = await dbPool.query(`SELECT spaces_members.id, user_id, accounts.user_name, accounts.full_name, spaces_members.imagesUrl
                                            FROM spaces_members 
                                            INNER JOIN accounts ON user_id = accounts.id 
                                            WHERE space_id = ${space_id}`);
-        res.json(responseUtil.success({data: {rows}}));
+
+            res.json(responseUtil.success({data: {rows}}));
+        }
     } catch (err) {
         res.send(responseUtil.fail({reason: err.message}));
     }

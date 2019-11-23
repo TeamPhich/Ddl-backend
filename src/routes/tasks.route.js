@@ -14,4 +14,5 @@ router.get("/status", tokenCurrentSpace.verify, tasksController.getStatusTaskLis
 router.put("/status", tokenCurrentSpace.verify, tasksController.updateTaskStatus);
 router.put("/", tokenCurrentSpace.verify, member.spaceVerify, tasksController.updateTask);
 router.delete("/", tokenCurrentSpace.verify, privilege.verify(6), tasksController.deleteTask);
+
 module.exports = router;

@@ -43,7 +43,6 @@ async function login(req, res) {
                 expiresIn: twentyFourHours
             }
         );
-
         res.json(responseUtil.success({data: {token}}));
 
     } catch (err) {
@@ -70,7 +69,8 @@ async function register(req, res) {
         if (existEmail.length) throw new Error("email existed");
         let salt = await bcrypt.genSalt(10);
         let hashPassword = await bcrypt.hash(password, salt);
-        await dbPool.query(`insert into accounts (user_name, password, email, full_name) values ("${user_name}", "${hashPassword}", "${email}", "${full_name}")`);
+        await dbPool.query(`insert into accounts (user_name, password, email, full_name) 
+        values ("${user_name}", "${hashPassword}", "${email}", "${full_name}")`);
 
         res.json(responseUtil.success({data: {}}))
 

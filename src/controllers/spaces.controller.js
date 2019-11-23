@@ -57,7 +57,7 @@ async function addMember(req, res) {
             throw new Error("member_username field is missing!");
         const [memberInformation] = await dbPool.query(`select * from accounts 
                                     where user_name = "${member_username}"`);
-        if(!memberInformation.length)
+        if (!memberInformation.length)
             throw new Error("username don't existed");
         const member_id = memberInformation[0].id;
         const [member] = await dbPool.query(`SELECT user_id 
@@ -86,17 +86,31 @@ async function addMember(req, res) {
 async function getMemberList(req, res) {
     const id = req.tokenData.id;
     const space_id = req.tokenData.space_id;
+    const {member_id} = req.query;
     try {
         const [user] = await dbPool.query(`SELECT user_id
                                            FROM spaces_members
                                            WHERE user_id = ${id} AND space_id = ${space_id}`);
         if (!user.length)
             throw new Error("user is not in this space");
-        const [rows] = await dbPool.query(`SELECT spaces_members.id, user_id, accounts.user_name, accounts.full_name
+
+        if(member_id) {
+            const [memberIsInSpace] = await dbPool.query(`SELECT * FROM spaces_members 
+                                                                WHERE id = ${member_id} and space_id = ${space_id}`);
+            if(!memberIsInSpace.length) throw new Error("Member who you sent isn't in this space.");
+            const [memberInformation] = await dbPool.query(`SELECT spaces_members.id, user_id, accounts.user_name, accounts.full_name, spaces_members.imagesUrl
+                                           FROM spaces_members 
+                                           INNER JOIN accounts ON user_id = accounts.id 
+                                           WHERE spaces_members.id = ${member_id}`);
+            res.json(responseUtil.success({data: {memberInformation}}));
+        } else {
+            const [rows] = await dbPool.query(`SELECT spaces_members.id, user_id, accounts.user_name, accounts.full_name, spaces_members.imagesUrl
                                            FROM spaces_members 
                                            INNER JOIN accounts ON user_id = accounts.id 
                                            WHERE space_id = ${space_id}`);
-        res.json(responseUtil.success({data: {rows}}));
+
+            res.json(responseUtil.success({data: {rows}}));
+        }
     } catch (err) {
         res.send(responseUtil.fail({reason: err.message}));
     }
@@ -181,7 +195,33 @@ async function authorizeAdmin(req, res) {
     } catch (err) {
         res.json(responseUtil.fail({reason: err.message}));
     }
-}
+};
+
+async function deleteSpace(req, res) {
+    const space_id = req.tokenData.space_id;
+    try {
+        let [groups] = await dbPool.query(`SELECT *
+                                           FROM groups
+                                           WHERE space_id = ${space_id}`);
+        for (let i = 0; i < groups.length; i++) {
+            await dbPool.query(`DELETE FROM messages
+                                WHERE group_id = ${groups[i].id}`);
+            await dbPool.query(`DELETE FROM groups_members
+                                WHERE group_id = ${groups[i].id}`);
+            await dbPool.query(`DELETE FROM groups
+                                WHERE id = ${groups[i].id}`);
+        }
+        await dbPool.query(`DELETE FROM jobs
+                            WHERE space_id = ${space_id}`);
+        await dbPool.query(`DELETE FROM spaces_members
+                            WHERE space_id = ${space_id}`);
+        await dbPool.query(`DELETE FROM spaces
+                            WHERE id = ${space_id}`);
+        res.json(responseUtil.success({data: {}}))
+    } catch (err) {
+        res.json(responseUtil.fail({reason: err.message}));
+    }
+};
 
 module.exports = {
     createSpace,
@@ -190,5 +230,6 @@ module.exports = {
     getMemberList,
     removeMember,
     leaveSpace,
-    authorizeAdmin
+    authorizeAdmin,
+    deleteSpace
 };

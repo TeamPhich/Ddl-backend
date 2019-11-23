@@ -79,7 +79,7 @@ async function getTaskListOfCreator(req, res) {
 
 async function getStatusTaskList(req, res) {
     const space_id = req.tokenData.space_id;
-    const status = req.body;
+    const status = req.body.status;
     try {
         if (!status)
             throw new Error("status field id missing");
@@ -87,19 +87,19 @@ async function getStatusTaskList(req, res) {
         if (status === "todo")
             [rows] = await dbPool.query(`SELECT id, creator_id, member_id, title, description, deadline, status
                                          FROM jobs
-                                         WHERE space_id = ${space_id} AND status = ${status}`);
+                                         WHERE space_id = ${space_id} AND status = "${status}"`);
         if (status === "in process")
             [rows] = await dbPool.query(`SELECT id, creator_id, member_id, title, description, deadline, status
                                          FROM jobs
-                                         WHERE space_id = ${space_id} AND status = ${status}`);
+                                         WHERE space_id = ${space_id} AND status = "${status}"`);
         if (status === "review")
             [rows] = await dbPool.query(`SELECT id, creator_id, member_id, title, description, deadline, status
                                          FROM jobs
-                                         WHERE space_id = ${space_id} AND status = ${status}`);
+                                         WHERE space_id = ${space_id} AND status = "${status}"`);
         if (status === "done")
             [rows] = await dbPool.query(`SELECT id, creator_id, member_id, title, description, deadline, status
                                          FROM jobs
-                                         WHERE space_id = ${space_id} AND status = ${status}`);
+                                         WHERE space_id = ${space_id} AND status = "${status}"`);
         res.json(responseUtil.success({data: {rows}}));
     } catch (err) {
         res.json(responseUtil.fail({reason: err.message}));

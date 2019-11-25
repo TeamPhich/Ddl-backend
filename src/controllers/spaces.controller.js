@@ -86,29 +86,40 @@ async function addMember(req, res) {
 async function getMemberList(req, res) {
     const id = req.tokenData.id;
     const space_id = req.tokenData.space_id;
-    const {member_id} = req.query;
+    const {member_id, keywords} = req.query;
     try {
         const [user] = await dbPool.query(`SELECT user_id
                                            FROM spaces_members
                                            WHERE user_id = ${id} AND space_id = ${space_id}`);
         if (!user.length)
             throw new Error("user is not in this space");
+        if (member_id && keywords)
+            throw new Error("Just send only query parameter");
 
-        if(member_id) {
-            const [memberIsInSpace] = await dbPool.query(`SELECT * FROM spaces_members 
+        if (member_id) {
+            const [] = await dbPool.query(`SELECT * FROM spaces_members 
                                                                 WHERE id = ${member_id} and space_id = ${space_id}`);
-            if(!memberIsInSpace.length) throw new Error("Member who you sent isn't in this space.");
+            if (!memberIsInSpace.length) throw new Error("Member who you sent isn't in this space.");
             const [memberInformation] = await dbPool.query(`SELECT spaces_members.id, user_id, accounts.user_name, accounts.full_name, spaces_members.imagesUrl
                                            FROM spaces_members 
                                            INNER JOIN accounts ON user_id = accounts.id 
                                            WHERE spaces_members.id = ${member_id}`);
-            res.json(responseUtil.success({data: {memberInformation}}));
+            res.json(responseUtil.success({data: {rows: memberInformation}}));
+        } else if (keywords) {
+            const [rowsSearchUserResult] = await dbPool.query(`SELECT spaces_members.id as id, accounts.id as user_id, 
+                                            accounts.user_name, accounts.full_name, spaces_members.imagesUrl 
+                                            FROM accounts
+											join spaces_members on spaces_members.user_id = accounts.id
+                                            where spaces_members.space_id = ${space_id} 
+                                            AND MATCH(accounts.user_name)
+                                            AGAINST('+${keywords}*' IN boolean MODE)
+                                            limit 6`);
+            res.json(responseUtil.success({data: {rows: rowsSearchUserResult}}))
         } else {
             const [rows] = await dbPool.query(`SELECT spaces_members.id, user_id, accounts.user_name, accounts.full_name, spaces_members.imagesUrl
                                            FROM spaces_members 
                                            INNER JOIN accounts ON user_id = accounts.id 
                                            WHERE space_id = ${space_id}`);
-
             res.json(responseUtil.success({data: {rows}}));
         }
     } catch (err) {

@@ -10,13 +10,13 @@ async function getGroups(req, res) {
                                                 WHERE spaces_members.user_id = "${id}"
                                                 AND spaces_members.space_id = "${space_id}"`);
         if (!temp_id.length) throw  new Error("you are not in space");
-        const [rows1] = await dbPool.query(`    SELECT groups.id,groups.name FROM groups 
+        const [rows1] = await dbPool.query(`    SELECT groups.id as group_id, groups.name FROM groups 
                                                 INNER JOIN groups_members ON groups.id = groups_members.group_id
                                                 INNER JOIN spaces_members ON groups_members.member_id = spaces_members.id
                                                 WHERE groups.space_id = "${space_id}"
                                                 AND spaces_members.user_id = "${id}"
                                                 AND groups.couple = 0`);
-        const [rows2] = await dbPool.query(` SELECT user_name,groups_members.group_id FROM accounts 
+        const [rows2] = await dbPool.query(` SELECT user_name as name,groups_members.group_id FROM accounts 
                                             INNER JOIN spaces_members ON accounts.id = spaces_members.user_id
                                             INNER JOIN groups_members ON spaces_members.id = groups_members.member_id
                                             WHERE groups_members.member_id <> "${space_member_id}"

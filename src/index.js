@@ -12,13 +12,15 @@ const chatNsp = io.of("/chat");
 
 async function getMessages(offset, socket, group_id) {
     try {
-        const [messagesRows] = await dbPool.query(`SELECT m.user_id, a.user_name, m.message, m.time
+        const [messagesRows] = await dbPool.query(`SELECT m.user_id, a.user_name, m.message, m.time, sm.imagesUrl
                                             FROM messages m
                                             join accounts a on a.id = m.user_id
-                                            WHERE m.group_id = ${group_id}
+                                            join groups g on g.id = m.group_id
+                                            join spaces_members sm on sm.user_id = m.user_id and sm.space_id = g.space_id
+                                            WHERE m.group_id = ?
                                             ORDER by time DESC
-                                            limit 5
-                                            offset ${offset}`);
+                                            limit 15
+                                            offset ?`, [group_id, offset]);
         for (let i in messagesRows) {
             messagesRows[i].isUserMessages = messagesRows[i].user_id === socket.tokenData.id;
         }
@@ -31,6 +33,7 @@ async function getMessages(offset, socket, group_id) {
 chatNsp.use((socket, next) => {
     if (socket.handshake.query && socket.handshake.query.spaceToken) {
         const {spaceToken, group_id} = socket.handshake.query;
+        if(!group_id) return next(new Error('missing group_id'));
         jwt.verify(spaceToken, spaceSecretKey, (err, decoded) => {
             if (err) return next(new Error('Authentication error'));
             socket.tokenData = decoded;

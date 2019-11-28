@@ -191,7 +191,7 @@ async function leaveSpace(req, res) {
     } catch (err) {
         res.json(responseUtil.fail({reason: err.message}));
     }
-};
+}
 
 async function authorizeAdmin(req, res) {
     const space_id = req.tokenData.space_id;
@@ -206,7 +206,7 @@ async function authorizeAdmin(req, res) {
     } catch (err) {
         res.json(responseUtil.fail({reason: err.message}));
     }
-};
+}
 
 async function deleteSpace(req, res) {
     const space_id = req.tokenData.space_id;
@@ -232,7 +232,18 @@ async function deleteSpace(req, res) {
     } catch (err) {
         res.json(responseUtil.fail({reason: err.message}));
     }
-};
+}
+
+async function getProfile(req, res) {
+    try {
+        const {space_member_id} = req.tokenData;
+        const profile = await dbPool.query(`select * from spaces_members where id = ${space_member_id}`);
+        res.json(responseUtil.success({data: {profile: profile[0]}}))
+    } catch (err) {
+        res.json(responseUtil.fail({reason: err.message}));
+    }
+}
+
 
 module.exports = {
     createSpace,
@@ -242,5 +253,6 @@ module.exports = {
     removeMember,
     leaveSpace,
     authorizeAdmin,
-    deleteSpace
+    deleteSpace,
+    getProfile
 };

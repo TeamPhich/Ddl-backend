@@ -193,7 +193,7 @@ async function updateTask(req, res) {
 
 async function deleteTask(req, res) {
     const admin = req.tokenData.space_member_id;
-    const {task_id} = req.body;
+    const {task_id} = req.params;
     try {
         if (!task_id)
             throw new Error("task_id field is missing!");

@@ -5,7 +5,7 @@ const spaceToken = require("../middleware/tokenCurrentSpace");
 
 router.get("/", spaceToken.verify, groupsController.getGroups);
 router.post("/", spaceToken.verify, groupsController.createGroup);
-router.get("/members", spaceToken.verify, groupsController.getMembers);
+router.get("/members/:group_id", spaceToken.verify, groupsController.getMembers);
 router.post("/members", spaceToken.verify, groupsController.addMembers);
 router.put("/members", spaceToken.verify, groupsController.removeMembers);
 

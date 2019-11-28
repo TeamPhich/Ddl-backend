@@ -116,7 +116,7 @@ async function removeMembers(req, res) {
 async function getMembers(req, res) {
     const {
         group_id
-    } = req.body
+    } = req.params
     try {
         const id = req.tokenData.id;
         const [temp_id] = await dbPool.query(`  SELECT * FROM spaces_members

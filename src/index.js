@@ -18,7 +18,7 @@ async function getMessages(offset, socket, group_id) {
                                             join groups g on g.id = m.group_id
                                             join spaces_members sm on sm.user_id = m.user_id and sm.space_id = g.space_id
                                             WHERE m.group_id = ?
-                                            ORDER by time DESC
+                                            ORDER by time ASC
                                             limit 15
                                             offset ?`, [group_id, offset]);
         for (let i in messagesRows) {

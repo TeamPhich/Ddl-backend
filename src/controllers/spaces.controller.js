@@ -237,7 +237,11 @@ async function deleteSpace(req, res) {
 async function getProfile(req, res) {
     try {
         const {space_member_id} = req.tokenData;
-        const profile = await dbPool.query(`select * from spaces_members where id = ${space_member_id}`);
+        const profile = await dbPool.query(`SELECT sm.imagesUrl, a.user_name, a.full_name, a.email, r.name as role_name
+                                                    from spaces_members sm
+                                                    join accounts a on a.id = sm.user_id
+                                                    join roles r on r.id = sm.role_id
+                                                    WHERE sm.id = ${space_member_id}`);
         res.json(responseUtil.success({data: {profile: profile[0]}}))
     } catch (err) {
         res.json(responseUtil.fail({reason: err.message}));

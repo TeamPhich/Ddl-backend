@@ -43,7 +43,7 @@ async function getTaskListOfMember(req, res) {
                                            WHERE user_id = ${user_id}`);
         let rows = [];
         for (let i = 0; i < member.length; i++) {
-            let [row] = await dbPool.query(`SELECT id, space_id, creator_id, member_id, title, description, deadline, status
+            let [row] = await dbPool.query(`SELECT id, space_id, creator_id, member_id, title, description, deadline, status, 
                                             FROM jobs
                                             WHERE member_id = ${member[i].id} AND space_id = ${member[i].space_id}`);
             for (let j = 0; j < row.length; j++) {

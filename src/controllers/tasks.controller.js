@@ -43,7 +43,7 @@ async function getTaskListOfMember(req, res) {
                                            WHERE user_id = ${user_id}`);
         let rows = [];
         for (let i = 0; i < member.length; i++) {
-            let [row] = await dbPool.query(`SELECT id, space_id, creator_id, member_id, title, description, deadline, status, 
+            let [row] = await dbPool.query(`SELECT id, space_id, creator_id, member_id, title, description, deadline, status
                                             FROM jobs
                                             WHERE member_id = ${member[i].id} AND space_id = ${member[i].space_id}`);
             for (let j = 0; j < row.length; j++) {
@@ -79,6 +79,7 @@ async function getTaskListOfCreator(req, res) {
 
 async function getStatusTaskList(req, res) {
     const space_id = req.tokenData.space_id;
+    const space_member_id = req.tokenData.space_member_id;
     const status = req.query.status;
     try {
         if (!status)
@@ -92,7 +93,7 @@ async function getStatusTaskList(req, res) {
             [rows] = await dbPool.query(`SELECT id, creator_id, member_id, title, description, deadline, status
                                          FROM jobs
                                          WHERE space_id = ${space_id} AND status = "${status}"`);
-        if (status === "review")
+        if (status === "in review")
             [rows] = await dbPool.query(`SELECT id, creator_id, member_id, title, description, deadline, status
                                          FROM jobs
                                          WHERE space_id = ${space_id} AND status = "${status}"`);
@@ -100,6 +101,22 @@ async function getStatusTaskList(req, res) {
             [rows] = await dbPool.query(`SELECT id, creator_id, member_id, title, description, deadline, status
                                          FROM jobs
                                          WHERE space_id = ${space_id} AND status = "${status}"`);
+        const [memberInfor] = await dbPool.query(`select * from spaces_members where id = ${space_member_id}`);
+        for (let i = 0; i < rows.length; i++) {
+            if(memberInfor[0].role_id === 4){
+                rows[i].role = 3;
+                continue;
+            }
+            if(rows[i].creator_id === space_member_id){
+                rows[i].role = 2;
+                continue;
+            }
+            if(rows[i].member_id === space_member_id){
+                rows[i].role = 1;
+                continue;
+            }
+            rows[i].role = 0;
+        }
         res.json(responseUtil.success({data: {rows}}));
     } catch (err) {
         res.json(responseUtil.fail({reason: err.message}));

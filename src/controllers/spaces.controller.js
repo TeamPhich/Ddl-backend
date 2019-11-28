@@ -248,6 +248,22 @@ async function getProfile(req, res) {
     }
 }
 
+async function putProfile(req,res) {
+    try {
+        const {id,space_member_id} = req.tokenData;
+        const {full_name, email, imagesUrl} = req.query;
+        if(full_name)
+            await dbPool.query(`UPDATE accounts SET full_name="${full_name}" WHERE id = ${id}`);
+        if(email)
+           await dbPool.query(`UPDATE accounts SET email="${email}" WHERE id = ${id}`);
+        console.log(`UPDATE accounts SET email="${email}" WHERE id = ${id}`)
+        if(imagesUrl)
+            await dbPool.query(`UPDATE spaces_members SET imagesUrl="${imagesUrl}" WHERE id = ${space_member_id}`);
+        res.json(responseUtil.success({data: {}}))
+    } catch (err) {
+        res.json(responseUtil.fail({reason: err.message}));
+    }
+}
 
 module.exports = {
     createSpace,
@@ -258,5 +274,6 @@ module.exports = {
     leaveSpace,
     authorizeAdmin,
     deleteSpace,
-    getProfile
+    getProfile,
+    putProfile
 };

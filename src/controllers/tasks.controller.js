@@ -103,19 +103,9 @@ async function getStatusTaskList(req, res) {
                                          WHERE space_id = ${space_id} AND status = "${status}"`);
         const [memberInfor] = await dbPool.query(`select * from spaces_members where id = ${space_member_id}`);
         for (let i = 0; i < rows.length; i++) {
-            if(memberInfor[0].role_id === 4){
-                rows[i].role = 3;
-                continue;
-            }
-            if(rows[i].creator_id === space_member_id){
-                rows[i].role = 2;
-                continue;
-            }
-            if(rows[i].member_id === space_member_id){
-                rows[i].role = 1;
-                continue;
-            }
-            rows[i].role = 0;
+            rows[i].isSuperAdmin = memberInfor[0].role_id === 4;
+            rows[i].isCreator = rows[i].creator_id === space_member_id;
+            rows[i].isMember = rows[i].member_id === space_member_id;
         }
         res.json(responseUtil.success({data: {rows}}));
     } catch (err) {

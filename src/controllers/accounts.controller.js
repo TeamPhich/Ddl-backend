@@ -108,9 +108,30 @@ async function getCurrentSpaceToken(req, res) {
     }
 }
 
+
+async function changeNewPassword(req, res) {
+    const { oldPassword, newPassword } = req.body;
+    try {
+        const {id} = req.tokenData;
+        if(!oldPassword) throw new Error("oldPassword fields is missing");
+        if(!newPassword) throw new Error("newPassword fields is missing");
+        if (newPassword.length < 8) throw new Error("password must greater than 8 characters");
+        let salt = await bcrypt.genSalt(10);
+        const [userInformation] = await dbPool.query(`select * from accounts where id = ${id}`);
+        const validatePW = await bcrypt.compare( oldPassword, userInformation[0].password);
+        if(!validatePW) throw new Error("oldPassword is wrong");
+        let hashPassword = await bcrypt.hash(newPassword, salt);
+        await dbPool.query(`update accounts set password = "${hashPassword}" where id = ${id}`);
+        res.json(responseUtil.success({data: {}}));
+    } catch (err) {
+        res.json(responseUtil.fail({reason: err.message}));
+    }
+}
+
 module.exports = {
     searchAccounts,
     register,
     login,
-    getCurrentSpaceToken
+    getCurrentSpaceToken,
+    changeNewPassword
 };

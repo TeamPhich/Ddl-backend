@@ -46,6 +46,8 @@ chatNsp.use((socket, next) => {
 }).on('connection', (socket) => {
     const group_id = socket.group_id;
     socket.join(group_id);
+    const groupsSocketId = "/groups#" + socket.id.split("#")[1];
+    io.of("/groups").to(groupsSocketId).emit("hello", {message: "hello"});
 
     socket.on("messages.get", async (data) => {
         const messages = await getMessages(data.offset, socket, group_id);
@@ -65,6 +67,10 @@ chatNsp.use((socket, next) => {
             socket.emit('err', {messages: err.message})
         }
     })
+});
+
+groupNsp.on("connection", (socket) => {
+    socket.on("hello", (data) => {console.log(data)});
 });
 
 server.listen(port, () => {

@@ -69,9 +69,6 @@ chatNsp.use((socket, next) => {
     })
 });
 
-groupNsp.on("connection", (socket) => {
-    socket.on("hello", (data) => {console.log(data)});
-});
 
 server.listen(port, () => {
     console.log("server is running on port: ", port);

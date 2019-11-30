@@ -116,9 +116,10 @@ async function getMemberList(req, res) {
                                             limit 6`);
             res.json(responseUtil.success({data: {rows: rowsSearchUserResult}}))
         } else {
-            const [rows] = await dbPool.query(`SELECT spaces_members.id, user_id, accounts.user_name, accounts.full_name, spaces_members.imagesUrl
+            const [rows] = await dbPool.query(`SELECT spaces_members.id, user_id, accounts.user_name, accounts.full_name, spaces_members.imagesUrl, roles.name as role_name
                                            FROM spaces_members 
                                            INNER JOIN accounts ON user_id = accounts.id 
+                                           INNER JOIN roles on roles.id = spaces_members.role_id
                                            WHERE space_id = ${space_id}`);
             res.json(responseUtil.success({data: {rows}}));
         }
@@ -193,14 +194,16 @@ async function leaveSpace(req, res) {
     }
 }
 
-async function authorizeAdmin(req, res) {
+async function changeRoles(req, res) {
     const space_id = req.tokenData.space_id;
     const {
-        member_id
+        member_id,
+        role_id
     } = req.body;
     try {
+        if(role_id !== 1 && role_id !== 2) throw new Error("yout can't grant this role");
         await dbPool.query(`UPDATE spaces_members
-                            SET role_id = 1
+                            SET role_id = ${role_id}
                             WHERE id = ${member_id} AND space_id = ${space_id}`);
         res.json(responseUtil.success({data: {}}));
     } catch (err) {
@@ -272,7 +275,7 @@ module.exports = {
     getMemberList,
     removeMember,
     leaveSpace,
-    authorizeAdmin,
+    changeRoles,
     deleteSpace,
     getProfile,
     putProfile

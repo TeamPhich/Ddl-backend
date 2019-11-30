@@ -9,7 +9,7 @@ async function verify(req, res, next) {
         const [userInformation] = await dbPool.query(`select * from spaces_members 
                                                         where id = ${space_member_id}`);
         const user_role = userInformation[0].role_id;
-        if (user_role === 1
+        if ((user_role === 1 || user_role === 2)
             && (memberAffectRole === 1 || memberAffectRole === 4)) throw new Error("you haven't privilege to use this function");
         next();
     } catch (err) {

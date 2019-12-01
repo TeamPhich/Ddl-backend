@@ -201,7 +201,7 @@ async function changeRoles(req, res) {
         role_id
     } = req.body;
     try {
-        if(role_id !== 1 && role_id !== 2) throw new Error("yout can't grant this role");
+        if (role_id !== 1 && role_id !== 2 && role_id !== 4) throw new Error("yout can't grant this role");
         await dbPool.query(`UPDATE spaces_members
                             SET role_id = ${role_id}
                             WHERE id = ${member_id} AND space_id = ${space_id}`);
@@ -251,15 +251,15 @@ async function getProfile(req, res) {
     }
 }
 
-async function putProfile(req,res) {
+async function putProfile(req, res) {
     try {
-        const {id,space_member_id} = req.tokenData;
+        const {id, space_member_id} = req.tokenData;
         const {full_name, email, imagesUrl} = req.query;
-        if(full_name)
+        if (full_name)
             await dbPool.query(`UPDATE accounts SET full_name="${full_name}" WHERE id = ${id}`);
-        if(email)
-           await dbPool.query(`UPDATE accounts SET email="${email}" WHERE id = ${id}`);
-        if(imagesUrl)
+        if (email)
+            await dbPool.query(`UPDATE accounts SET email="${email}" WHERE id = ${id}`);
+        if (imagesUrl)
             await dbPool.query(`UPDATE spaces_members SET imagesUrl="${imagesUrl}" WHERE id = ${space_member_id}`);
         res.json(responseUtil.success({data: {}}))
     } catch (err) {

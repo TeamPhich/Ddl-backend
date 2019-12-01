@@ -135,10 +135,36 @@ async function getMembers(req, res) {
     }
 }
 
+async function getMembersNotInGroup(req, res) {
+    const {
+        group_id
+    } = req.params
+    const id = req.tokenData.id;
+    const space_id = req.tokenData.space_id;
+    try {
+        const [temp_id] = await dbPool.query(`  SELECT * FROM spaces_members
+                                                INNER JOIN groups_members ON spaces_members.id = groups_members.member_id
+                                                WHERE spaces_members.user_id = "${id}"
+                                                AND groups_members.group_id = "${group_id}"`);
+        if (!temp_id.length) throw  new Error("you are not in group");
+        const [rows] = await dbPool.query(` SELECT user_name,full_name,spaces_members.role_id,spaces_members.imagesUrl FROM accounts
+                                            INNER JOIN spaces_members ON accounts.id = spaces_members.user_id
+                                            INNER JOIN groups_members ON spaces_members.id = groups_members.member_id
+                                            WHERE spaces_members.space_id = "${space_id}"
+                                            AND spaces_members.id NOT IN (  SELECT spaces_members.id FROM spaces_members
+                                                                            INNER JOIN groups_members ON spaces_members.id = groups_members.member_id
+                                                                            WHERE groups_members.group_id = "${group_id}")`);
+        res.json(responseUtil.success({data: {rows}}))
+    } catch (err) {
+        res.json(responseUtil.fail({reason: err.message}))
+    }
+}
+
 module.exports = {
     getGroups,
     createGroup,
     addMembers,
     removeMembers,
-    getMembers
+    getMembers,
+    getMembersNotInGroup
 };

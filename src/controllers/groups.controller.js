@@ -148,7 +148,7 @@ async function getMembersNotInGroup(req, res) {
                                                 AND groups_members.group_id = "${group_id}"`);
         if (!temp_id.length) throw  new Error("you are not in group");
         const [rows] = await dbPool.query(` SELECT user_name,full_name,spaces_members.role_id,spaces_members.imagesUrl FROM accounts
-                                            INNER JOIN spaces_members ON accounts.id = spaces_members.user_is
+                                            INNER JOIN spaces_members ON accounts.id = spaces_members.user_id
                                             INNER JOIN groups_members ON spaces_members.id = groups_members.member_id
                                             WHERE spaces_members.space_id = "${space_id}"
                                             AND spaces_members.id NOT IN (  SELECT spaces_members.id FROM spaces_members

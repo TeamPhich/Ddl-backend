@@ -152,8 +152,8 @@ async function getMembersNotInGroup(req, res) {
                                             INNER JOIN groups_members ON spaces_members.id = groups_members.member_id
                                             WHERE spaces_members.space_id = "${space_id}"
                                             AND spaces_members.id NOT IN (  SELECT spaces_members.id FROM spaces_members
-                                                                            INNER JOIN groups_members ON spaces_members.id = groups_members.member_id)
-                                                                            WHERE groups_members.group_id = "${group_id}"`);
+                                                                            INNER JOIN groups_members ON spaces_members.id = groups_members.member_id
+                                                                            WHERE groups_members.group_id = "${group_id}")`);
         res.json(responseUtil.success({data: {rows}}))
     } catch (err) {
         res.json(responseUtil.fail({reason: err.message}))

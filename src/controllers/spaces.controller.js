@@ -259,7 +259,6 @@ async function putProfile(req,res) {
             await dbPool.query(`UPDATE accounts SET full_name="${full_name}" WHERE id = ${id}`);
         if(email)
            await dbPool.query(`UPDATE accounts SET email="${email}" WHERE id = ${id}`);
-        console.log(`UPDATE accounts SET email="${email}" WHERE id = ${id}`)
         if(imagesUrl)
             await dbPool.query(`UPDATE spaces_members SET imagesUrl="${imagesUrl}" WHERE id = ${space_member_id}`);
         res.json(responseUtil.success({data: {}}))

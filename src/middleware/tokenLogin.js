@@ -7,9 +7,10 @@ function verify(req, res, next) {
     if (token) {
         jwt.verify(token, secretKey, (err, decoded) => {
             if (err) {
-                return res.status(403).json({
+                return res.json({
                     success: false,
-                    message: "token is invalid"
+                    status: 101,
+                    reason: "login_token is invalid"
                 });
             } else {
                 req.tokenData = decoded;
@@ -18,7 +19,8 @@ function verify(req, res, next) {
         })
     } else {
         return res.status(403).json({
-            message: "please send a token"
+            success: false,
+            reason: "space_token is invalid",
         })
     }
 }

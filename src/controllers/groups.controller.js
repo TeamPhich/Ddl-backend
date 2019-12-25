@@ -60,7 +60,7 @@ async function createGroup(req, res) {
 
 async function addMembers(req, res) {
     const {
-        member_ids,
+        member_id,
         group_id
     } = req.body;
     try {
@@ -72,18 +72,16 @@ async function addMembers(req, res) {
         if (!temp_id.length) throw  new Error("you are not in group");
         if (!member_ids) throw new Error("member_ids field is missing");
         if (!group_id) throw new Error("group_id field is missing");
-        for (let i = member_ids.length - 1; i >= 0; i--) {
-            const [temp1] = await dbPool.query(`    SELECT * FROM groups_members
-                                                    WHERE groups_members.member_id = "${member_ids[i]}" AND groups_members.group_id = "${group_id}"`);
-            if (temp1.length) throw new Error("user was in group");
-            const [temp2] = await dbPool.query(`    SELECT * FROM spaces_members 
-                                                    WHERE spaces_members.id = "${member_ids[i]}"
+        const [temp1] = await dbPool.query(`    SELECT * FROM groups_members
+                                                    WHERE groups_members.member_id = "${member_id}" AND groups_members.group_id = "${group_id}"`);
+        if (temp1.length) throw new Error("user was in group");
+        const [temp2] = await dbPool.query(`    SELECT * FROM spaces_members 
+                                                    WHERE spaces_members.id = "${member_id}"
                                                     AND spaces_members.space_id = ( SELECT space_id FROM groups 
                                                                                     INNER JOIN spaces ON groups.space_id = spaces.id
                                                                                     WHERE groups.id = "${group_id}")`);
-            if (!temp2.length) throw new Error("user not in space")
-            const [temp] = await dbPool.query(`INSERT INTO groups_members (member_id, group_id) VALUES ("${member_ids[i]}","${group_id}")`);
-        }
+        if (!temp2.length) throw new Error("user not in space")
+        const [temp] = await dbPool.query(`INSERT INTO groups_members (member_id, group_id) VALUES ("${member_id}","${group_id}")`);
         res.json(responseUtil.success({data: {}}))
     } catch (err) {
         res.json(responseUtil.fail({reason: err.message}))

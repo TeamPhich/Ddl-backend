@@ -201,7 +201,7 @@ async function changeRoles(req, res) {
         role_id
     } = req.body;
     try {
-        if (role_id !== 1 && role_id !== 2 && role_id !== "4") throw new Error("yout can't grant this role");
+        if (role_id !== 1 && role_id !== 2 && role_id !== 4) throw new Error("yout can't grant this role");
         await dbPool.query(`UPDATE spaces_members
                             SET role_id = ${role_id}
                             WHERE id = ${member_id} AND space_id = ${space_id}`);
